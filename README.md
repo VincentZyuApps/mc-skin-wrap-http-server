@@ -8,10 +8,11 @@ python -m venv venv
 
 source ./venv/bin/activate
 
-pip install httpx fastapi uvicorn
+pip install fastapi uvicorn requests
+pip freeze > requirements.txt
 pip install -r requirements.txt
 
-uvicorn main:app --reload --host 0.0.0.0 --port 8416
+uvicorn main:app --reload --host 0.0.0.0 --port 8418
 ```
 
 

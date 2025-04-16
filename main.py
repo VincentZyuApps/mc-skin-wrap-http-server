@@ -1,34 +1,29 @@
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
-import httpx
+import requests
 
 app = FastAPI()
 
-# 允许跨域访问
+# 允许跨域请求
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 可以设置为特定域名, 比如 ["https://abc.domain.com"]
+    allow_origins=["*"],  # 或改成指定域名，如 ["https://abc.domain.com"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# minotar.net 基础URL
-MINOTAR_URL = "https://minotar.net"
-
-# 获取皮肤
-@app.get("/mcjava/skin/{name}")
-async def get_skin(name: str):
-    skin_url = f"{MINOTAR_URL}/skin/{name}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(skin_url)
-        return RedirectResponse(url=response.url)
-
-# 获取头像
+# 获取头像（方形头像）
 @app.get("/mcjava/avatar/{name}")
-async def get_avatar(name: str):
-    avatar_url = f"{MINOTAR_URL}/avatar/{name}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(avatar_url)
-        return RedirectResponse(url=response.url)
+def get_avatar(name: str):
+    url = f"https://minotar.net/avatar/{name}"
+    r = requests.get(url)
+    return Response(content=r.content, media_type="image/png")
+
+# 获取皮肤（原始皮肤图）
+@app.get("/mcjava/skin/{name}")
+def get_skin(name: str):
+    url = f"https://minotar.net/skin/{name}"
+    r = requests.get(url)
+    return Response(content=r.content, media_type="image/png")
