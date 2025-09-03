@@ -65,3 +65,17 @@ def get_server_status(addr: str):
         # 捕获请求异常，并返回一个带有适当HTTP状态码的错误响应
         # 502 Bad Gateway 适合用于转发请求失败的场景
         raise HTTPException(status_code=502, detail=f"Failed to fetch server status from external API: {e}")
+    
+# 获取 CS:GO 库存（Steam）
+@app.get("/cs/inv/{steamid}")
+def get_cs_inventory(steamid: str):
+    """
+    通过 SteamID 获取 CS:GO 库存原始数据
+    """
+    url = f"https://steamcommunity.com/inventory/{steamid}/730/2?l=schinese"
+    try:
+        r = requests.get(url)
+        r.raise_for_status()
+        return JSONResponse(content=r.json())
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=502, detail=f"Failed to fetch CS:GO inventory: {e}")
