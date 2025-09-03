@@ -79,3 +79,27 @@ def get_cs_inventory(steamid: str):
         return JSONResponse(content=r.json())
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=502, detail=f"Failed to fetch CS:GO inventory: {e}")
+
+# 获取 CS:GO 玩家信息（Steam）
+@app.get("/cs/player/{steamid}")
+def get_cs_player(steamid: str):
+    """
+    通过 SteamID 获取玩家信息
+    """
+    try:
+        # 读取 API Key
+        with open("steam_api_key.txt", "r", encoding="utf-8") as f:
+            api_key = f.read().strip()
+
+        url = (
+            f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/"
+            f"?key={api_key}&steamids={steamid}"
+        )
+
+        r = requests.get(url)
+        r.raise_for_status()
+        return JSONResponse(content=r.json())
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="steam_api_key.txt not found")
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=502, detail=f"Failed to fetch player info: {e}")
