@@ -87,3 +87,6 @@ git fetch origin
 git reset --hard origin/main
 ```
 
+## steam api
+统计目录下创建steam_api_key.txt
+填入内容

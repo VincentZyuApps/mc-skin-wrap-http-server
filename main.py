@@ -103,3 +103,24 @@ def get_cs_player(steamid: str):
         raise HTTPException(status_code=500, detail="steam_api_key.txt not found")
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=502, detail=f"Failed to fetch player info: {e}")
+
+# 获取图片代理
+@app.get("/image_proxy")
+def image_proxy(url: str):
+    """
+    通过代理获取图片，解决跨域或图片不稳定问题
+    """
+    try:
+        # 发送 GET 请求到目标 URL
+        r = requests.get(url, stream=True)
+        # 检查响应状态码
+        r.raise_for_status()
+
+        # 获取图片的 Content-Type
+        content_type = r.headers.get("Content-Type")
+
+        # 返回图片的二进制内容，并指定 Content-Type
+        return Response(content=r.content, media_type=content_type)
+    except requests.exceptions.RequestException as e:
+        # 捕获请求异常并返回 502 Bad Gateway 错误
+        raise HTTPException(status_code=502, detail=f"Failed to proxy image from external URL: {e}")
