@@ -220,7 +220,7 @@ jobs:
             echo ""
             echo "> Minecraft 皮肤/头像/服务器状态 API 代理服务"
             echo ""
-            echo "### ⬇️ Downloads"
+            echo "### ⬇️ Downloads (Go 二进制分发)"
             echo ""
             echo "| Platform | x86_64 (amd64) | ARM64 |"
             echo "|----------|----------------|-------|"
@@ -243,6 +243,11 @@ jobs:
             echo "**🇨🇳 国内 Gitee 镜像:**"
             echo '```bash'
             echo "curl -fsSL https://gitee.com/vincent-zyu/mc-skin-wrap-http-server/raw/main/doc/scripts/install_gitee.sh | bash"
+            echo '```'
+            echo ""
+            echo "**🇨🇳 Gitee 镜像 (指定版本):**"
+            echo '```bash'
+            echo "MC_SKIN_WRAP_VERSION=${VERSION} bash -c \"\$(curl -fsSL https://gitee.com/vincent-zyu/mc-skin-wrap-http-server/raw/main/doc/scripts/install_gitee.sh)\""
             echo '```'
             echo ""
             echo "> 📄 [View install script (GitHub)](https://github.com/${REPO}/blob/main/doc/scripts/install.sh)"
