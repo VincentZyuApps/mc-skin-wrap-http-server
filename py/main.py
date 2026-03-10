@@ -1,0 +1,190 @@
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+import requests
+import json
+import sys
+import os
+import logging
+import time
+import uvicorn
+
+# ========== 加载配置 ==========
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+
+def load_config() -> dict:
+    if not os.path.exists(CONFIG_PATH):
+        print(f"[ERROR] 找不到配置文件: {CONFIG_PATH}")
+        print(f"        请复制 config.example.json 为 config.json 并修改配置")
+        sys.exit(1)
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+config = load_config()
+
+# ========== 日志 ==========
+# 自定义 TRACE 级别 (比 DEBUG=10 更低)
+TRACE = 5
+logging.addLevelName(TRACE, "TRACE")
+
+LOG_LEVEL_MAP = {
+    "trace":  TRACE,
+    "debug":  logging.DEBUG,
+    "info":   logging.INFO,
+    "warn":   logging.WARNING,
+    "error":  logging.ERROR,
+    "silent": logging.CRITICAL + 10,  # 高于所有级别，静默
+}
+
+_cfg_level = config.get("log_level", "info").lower()
+_level = LOG_LEVEL_MAP.get(_cfg_level, logging.INFO)
+
+logging.basicConfig(
+    level=_level,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger("mc-skin-wrap")
+logger.setLevel(_level)
+
+logger.info(f"日志级别: {_cfg_level.upper()}")
+
+# ========== 代理 ==========
+proxies: dict | None = None
+if config.get("proxy_enabled", False):
+    proxy_url = (
+        f"{config['proxy_protocol']}://{config['proxy_host']}:{config['proxy_port']}"
+    )
+    proxies = {"http": proxy_url, "https": proxy_url}
+    logger.info(f"代理已启用: {proxy_url}")
+else:
+    logger.info("代理未启用")
+
+
+def proxy_get(url: str, max_retries: int = 2, **kwargs) -> requests.Response:
+    """统一的 GET 请求，自动带上代理配置。失败时自动重试，SSL 错误时尝试不走代理兜底。"""
+    logger.log(TRACE, f"proxy_get() 开始请求: {url}")
+    logger.debug(f"请求参数: proxies={proxies}, timeout=10, kwargs={kwargs}")
+
+    last_exception: Exception | None = None
+
+    for attempt in range(1, max_retries + 1):
+        start = time.perf_counter()
+        try:
+            r = requests.get(url, proxies=proxies, timeout=10, **kwargs)
+            elapsed = (time.perf_counter() - start) * 1000
+            logger.debug(f"响应状态码: {r.status_code}, 耗时: {elapsed:.1f}ms, 大小: {len(r.content)} bytes")
+            logger.log(TRACE, f"响应头: {dict(r.headers)}")
+            return r
+        except Exception as e:
+            elapsed = (time.perf_counter() - start) * 1000
+            logger.warning(f"请求失败 (第{attempt}/{max_retries}次): {url}, 耗时: {elapsed:.1f}ms, 异常: {type(e).__name__}: {e}")
+            last_exception = e
+
+    # 所有重试都失败了，如果开了代理，尝试不走代理兜底
+    if proxies:
+        logger.warning(f"代理请求全部失败，尝试直连兜底: {url}")
+        start = time.perf_counter()
+        try:
+            r = requests.get(url, timeout=10, **kwargs)
+            elapsed = (time.perf_counter() - start) * 1000
+            logger.info(f"直连兜底成功: {r.status_code}, 耗时: {elapsed:.1f}ms, 大小: {len(r.content)} bytes")
+            return r
+        except Exception as e:
+            elapsed = (time.perf_counter() - start) * 1000
+            logger.error(f"直连兜底也失败: {url}, 耗时: {elapsed:.1f}ms, 异常: {type(e).__name__}: {e}")
+            # 抛出原始代理错误，更有参考价值
+            raise last_exception  # type: ignore
+
+    logger.error(f"请求最终失败: {url}")
+    raise last_exception  # type: ignore
+
+app = FastAPI()
+
+# 允许跨域请求
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 生产环境建议改为指定域名，如 ["https://abc.domain.com"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 获取头像（方形头像）
+@app.get("/mcjava/avatar/{name}")
+def get_avatar(name: str):
+    """
+    通过玩家名获取 Minecraft Java 版头像
+    """
+    logger.info(f"[avatar] 请求头像: name={name}")
+    url = f"https://minotar.net/avatar/{name}"
+    try:
+        r = proxy_get(url)
+        r.raise_for_status()
+        logger.info(f"[avatar] 成功获取头像: name={name}, size={len(r.content)} bytes")
+        return Response(content=r.content, media_type="image/png")
+    except requests.exceptions.RequestException as e:
+        logger.error(f"[avatar] 获取头像失败: name={name}, error={e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch avatar: {e}")
+
+# 获取皮肤（原始皮肤图）
+@app.get("/mcjava/skin/{name}")
+def get_skin(name: str):
+    """
+    通过玩家名获取 Minecraft Java 版皮肤
+    """
+    logger.info(f"[skin] 请求皮肤: name={name}")
+    url = f"https://minotar.net/skin/{name}"
+    try:
+        r = proxy_get(url)
+        r.raise_for_status()
+        logger.info(f"[skin] 成功获取皮肤: name={name}, size={len(r.content)} bytes")
+        return Response(content=r.content, media_type="image/png")
+    except requests.exceptions.RequestException as e:
+        logger.error(f"[skin] 获取皮肤失败: name={name}, error={e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch skin: {e}")
+
+# 获取服务器状态
+@app.get("/mcjava/server_status/{addr}")
+def get_server_status(addr: str):
+    """
+    通过服务器地址获取 Minecraft Java 版服务器状态
+    """
+    # 构造 mcstatus.io 的 API URL
+    logger.info(f"[server_status] 请求服务器状态: addr={addr}")
+    url = f"https://api.mcstatus.io/v2/status/java/{addr}"
+    
+    try:
+        r = proxy_get(url)
+        r.raise_for_status()
+        data = r.json()
+        logger.info(f"[server_status] 成功获取状态: addr={addr}")
+        logger.debug(f"[server_status] 响应数据: {json.dumps(data, ensure_ascii=False)[:500]}")
+        return JSONResponse(content=data)
+    except requests.exceptions.RequestException as e:
+        logger.error(f"[server_status] 获取服务器状态失败: addr={addr}, error={e}")
+        raise HTTPException(status_code=502, detail=f"Failed to fetch server status from external API: {e}")
+
+
+# ========== 启动入口 ==========
+if __name__ == "__main__":
+    reload_flag = "--reload" in sys.argv
+
+    # uvicorn 的日志级别映射
+    uvicorn_log_level = _cfg_level if _cfg_level != "silent" else "critical"
+    # uvicorn 不认识 trace，降为 debug
+    if uvicorn_log_level == "trace":
+        uvicorn_log_level = "debug"
+
+    logger.info(f"host={config['host']} port={config['port']} root_path={config['root_path']} reload={reload_flag}")
+    logger.debug(f"uvicorn log_level={uvicorn_log_level}")
+    logger.log(TRACE, f"完整配置: {json.dumps({k: v for k, v in config.items() if not k.startswith('_')}, ensure_ascii=False)}")
+
+    uvicorn.run(
+        "main:app",
+        host=config["host"],
+        port=config["port"],
+        root_path=config["root_path"],
+        reload=reload_flag,
+        log_level=uvicorn_log_level,
+    )

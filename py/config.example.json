@@ -1,0 +1,25 @@
+{
+    "_host": "服务器监听地址，0.0.0.0 表示监听所有网卡",
+    "host": "0.0.0.0",
+
+    "_port": "服务器监听端口",
+    "port": 58418,
+
+    "_root_path": "根路径前缀，用于反向代理场景（如 nginx 配置了 /fastapi_skin_wrap 路径转发），留空字符串表示无前缀",
+    "root_path": "/fastapi_skin_wrap",
+
+    "_proxy_enabled": "是否启用代理，默认 false。设为 true 可模拟国外网络环境（比如部署到海外 VPS 前先在本地测试）",
+    "proxy_enabled": false,
+
+    "_proxy_protocol": "代理协议，可选值: http / https / socks4 / socks5 / socks5h。socks5h 表示由代理服务器解析 DNS",
+    "proxy_protocol": "http",
+
+    "_proxy_host": "代理服务器 IP 地址或域名",
+    "proxy_host": "127.0.0.1",
+
+    "_proxy_port": "代理服务器端口",
+    "proxy_port": 7890,
+
+    "_log_level": "日志级别，可选值: trace / debug / info / warn / error / silent。trace 最详细，silent 完全静默",
+    "log_level": "info"
+}
