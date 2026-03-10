@@ -1,0 +1,70 @@
+basePath: /gin_skin_wrap
+host: 127.0.0.1:60311
+info:
+  contact:
+    name: VincentZyu
+  description: Minecraft 皮肤/头像/服务器状态反向代理服务
+  license:
+    name: MIT
+  title: MC Skin Wrap API
+  version: 0.0.1
+paths:
+  /mcjava/avatar/{name}:
+    get:
+      description: 代理访问 https://minotar.net/avatar/{name}
+      parameters:
+      - description: 玩家名称
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: 头像图片
+          schema:
+            type: file
+      summary: 获取玩家头像
+      tags:
+      - Minecraft
+  /mcjava/server_status/{addr}:
+    get:
+      description: 代理访问 https://api.mcstatus.io/v2/status/java/{addr}
+      parameters:
+      - description: 服务器地址
+        in: path
+        name: addr
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 服务器状态 JSON
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取服务器状态
+      tags:
+      - Minecraft
+  /mcjava/skin/{name}:
+    get:
+      description: 代理访问 https://minotar.net/skin/{name}
+      parameters:
+      - description: 玩家名称
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: 皮肤图片
+          schema:
+            type: file
+      summary: 获取玩家皮肤
+      tags:
+      - Minecraft
+swagger: "2.0"

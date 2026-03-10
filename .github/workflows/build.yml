@@ -1,0 +1,192 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  # ── Check Commit Message ──────────────────────────────
+  check:
+    name: Check commit message
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.flags.outputs.should_build }}
+      should_release: ${{ steps.flags.outputs.should_release }}
+      should_publish: ${{ steps.flags.outputs.should_publish }}
+      should_publish_pypi: ${{ steps.flags.outputs.should_publish_pypi }}
+      should_publish_crates: ${{ steps.flags.outputs.should_publish_crates }}
+      should_benchmark: ${{ steps.flags.outputs.should_benchmark }}
+      version: ${{ steps.flags.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Parse commit message
+        id: flags
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          MSG="$COMMIT_MSG"
+          
+          # Extract version from go/main.go
+          # Looks for: const Version = "0.0.1"
+          VERSION="v$(grep 'const Version' go/main.go | awk '{print $4}' | tr -d '"')"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "📦 Version: $VERSION"
+          
+          # Always build PRs
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "should_build=true"    >> "$GITHUB_OUTPUT"
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "should_benchmark=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          
+          # Init flags
+          BUILD=false
+          RELEASE=false
+          
+          # Only build action and build release
+          if echo "$MSG" | grep -qi "build release"; then
+            BUILD=true
+            RELEASE=true
+          elif echo "$MSG" | grep -qi "build action"; then
+            BUILD=true
+          fi
+          
+          echo "should_build=$BUILD"     >> "$GITHUB_OUTPUT"
+          echo "should_release=$RELEASE" >> "$GITHUB_OUTPUT"
+          echo "should_publish=false"    >> "$GITHUB_OUTPUT"
+          echo "should_publish_pypi=false" >> "$GITHUB_OUTPUT"
+          echo "should_publish_crates=false" >> "$GITHUB_OUTPUT"
+          echo "should_benchmark=false"  >> "$GITHUB_OUTPUT"
+          
+          echo "📋 Flags: build=$BUILD release=$RELEASE publish=$PUBLISH publish_pypi=$PUBLISH_PYPI publish_crates=$PUBLISH_CRATES benchmark=$BENCHMARK"
+
+  # ── Sync to Gitee ─────────────────────────────────────
+  sync-gitee-code:
+    name: 【Gitee码云】Sync Code Commit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Mirror to Gitee
+        uses: Yikun/hub-mirror-action@v1.5
+        continue-on-error: true
+        with:
+          src: github/VincentZyuApps
+          dst: gitee/vincent-zyu
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+          dst_token: ${{ secrets.GITEE_TOKEN }}
+          static_list: "mc-skin-wrap-http-server"
+          force_update: true
+          debug: true
+
+  # ── Build (Multi-Platform) ─────────────────────────────
+  build:
+    name: Build ${{ matrix.name }}
+    needs: check
+    if: needs.check.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows x64
+          - goos: windows
+            goarch: amd64
+            name: windows-amd64
+            binary: mc-skin-wrap-go.exe
+            asset: mc-skin-wrap-go-windows-amd64.exe
+
+          # Linux x64
+          - goos: linux
+            goarch: amd64
+            name: linux-amd64
+            binary: mc-skin-wrap-go
+            asset: mc-skin-wrap-go-linux-amd64
+
+          # Windows ARM64
+          - goos: windows
+            goarch: arm64
+            name: windows-arm64
+            binary: mc-skin-wrap-go.exe
+            asset: mc-skin-wrap-go-windows-arm64.exe
+
+          # Linux ARM64
+          - goos: linux
+            goarch: arm64
+            name: linux-arm64
+            binary: mc-skin-wrap-go
+            asset: mc-skin-wrap-go-linux-arm64
+
+          # macOS x64
+          - goos: darwin
+            goarch: amd64
+            name: macos-amd64
+            binary: mc-skin-wrap-go
+            asset: mc-skin-wrap-go-macos-amd64
+
+          # macOS ARM64
+          - goos: darwin
+            goarch: arm64
+            name: macos-arm64
+            binary: mc-skin-wrap-go
+            asset: mc-skin-wrap-go-macos-arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          check-latest: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build via build.py
+        run: |
+          python go/build.py --os ${{ matrix.goos }} --arch ${{ matrix.goarch }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+          if-no-files-found: error
+
+  # ── Release to GitHub ──────────────────────────────────
+  release:
+    name: Release to GitHub
+    needs: [check, build]
+    if: needs.check.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.check.outputs.version }}
+          name: Release ${{ needs.check.outputs.version }}
+          files: artifacts/*
+

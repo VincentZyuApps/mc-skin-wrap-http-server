@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.responses import Response, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import requests
@@ -10,14 +10,27 @@ import time
 import uvicorn
 
 # ========== 加载配置 ==========
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
-
 def load_config() -> dict:
-    if not os.path.exists(CONFIG_PATH):
-        print(f"[ERROR] 找不到配置文件: {CONFIG_PATH}")
-        print(f"        请复制 config.example.json 为 config.json 并修改配置")
+    # 优先从命令行参数 -c 获取配置文件路径
+    config_path = "config.json"
+    if "-c" in sys.argv:
+        try:
+            config_path = sys.argv[sys.argv.index("-c") + 1]
+        except IndexError:
+            print("[ERROR] -c 参数后必须指定配置文件路径")
+            sys.exit(1)
+    
+    # 如果没通过参数指定，则尝试读取同目录下的 config.json
+    if not os.path.isabs(config_path):
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_path)
+
+    if not os.path.exists(config_path):
+        print(f"[ERROR] 找不到配置文件: {config_path}")
+        print(f"        请确保配置文件存在，或使用 -c 参数指定路径")
         sys.exit(1)
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+        
+    print(f"[INFO] 加载配置文件: {config_path}")
+    with open(config_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 config = load_config()
@@ -99,7 +112,17 @@ def proxy_get(url: str, max_retries: int = 2, **kwargs) -> requests.Response:
     logger.error(f"请求最终失败: {url}")
     raise last_exception  # type: ignore
 
-app = FastAPI()
+
+# ========== 路由 ==========
+# 使用 APIRouter 添加真实路由前缀
+root_path = config.get("root_path", "")
+
+# FastAPI 内置的 /docs 和 /redoc 也需要带前缀
+app = FastAPI(
+    docs_url=f"{root_path}/docs" if root_path else "/docs",
+    redoc_url=f"{root_path}/redoc" if root_path else "/redoc",
+    openapi_url=f"{root_path}/openapi.json" if root_path else "/openapi.json",
+)
 
 # 允许跨域请求
 app.add_middleware(
@@ -110,8 +133,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+router = APIRouter(prefix=root_path)
+
+
 # 获取头像（方形头像）
-@app.get("/mcjava/avatar/{name}")
+@router.get("/mcjava/avatar/{name}")
 def get_avatar(name: str):
     """
     通过玩家名获取 Minecraft Java 版头像
@@ -127,8 +153,9 @@ def get_avatar(name: str):
         logger.error(f"[avatar] 获取头像失败: name={name}, error={e}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch avatar: {e}")
 
+
 # 获取皮肤（原始皮肤图）
-@app.get("/mcjava/skin/{name}")
+@router.get("/mcjava/skin/{name}")
 def get_skin(name: str):
     """
     通过玩家名获取 Minecraft Java 版皮肤
@@ -144,8 +171,9 @@ def get_skin(name: str):
         logger.error(f"[skin] 获取皮肤失败: name={name}, error={e}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch skin: {e}")
 
+
 # 获取服务器状态
-@app.get("/mcjava/server_status/{addr}")
+@router.get("/mcjava/server_status/{addr}")
 def get_server_status(addr: str):
     """
     通过服务器地址获取 Minecraft Java 版服务器状态
@@ -164,6 +192,10 @@ def get_server_status(addr: str):
     except requests.exceptions.RequestException as e:
         logger.error(f"[server_status] 获取服务器状态失败: addr={addr}, error={e}")
         raise HTTPException(status_code=502, detail=f"Failed to fetch server status from external API: {e}")
+
+
+# 注册路由到 app
+app.include_router(router)
 
 
 # ========== 启动入口 ==========
