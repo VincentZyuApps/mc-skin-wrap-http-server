@@ -20,7 +20,7 @@
 - 🧥 **玩家皮肤** — 通过 [minotar.net](https://minotar.net)
 - 📊 **Java 服务器状态** — 通过 [mcstatus.io](https://mcstatus.io)
 
-## 💡 使用场景
+## 💡 使用场景举例
 
 把这个服务部署到阿美莉卡 or 其他海外地区的 VPS 上，然后让你的**前端网页**或**机器人插件**来调用——一个方便的代理，绕过墙或简化 API 访问。
 
@@ -48,9 +48,24 @@
 
 | 文档 | 说明 |
 |------|------|
-| [📘 Go 开发指南](doc/dev.go.md) | 构建、测试、Swagger 文档生成 |
-| [📗 Python 开发指南](doc/dev.py.md) | 环境搭建、快速启动 |
+| [📘 Go 开发指南](doc/dev.go.md) | 构建、测试、Swagger 文档生成、**一键 curl 测试命令** |
+| [📗 Python 开发指南](doc/dev.py.md) | 环境搭建、快速启动、**一键 curl 测试命令** |
 | [📙 Git 操作指南](doc/dev.git.md) | 生产环境同步、常用命令 |
+
+### 🌐 在线体验
+
+> 🎉 **懒得自己部署？** 直接用作者的公开接口试试吧~
+>
+> （2RMB/月的小鸡，上面没别的东西，被打了就打了，就当玩了 😂）
+>
+> ✨ 开源代码不够，还免费提供公开接口 —— 如此慷慨的作者，不来个 ⭐ Star 说不过去吧？
+
+| 接口 | 在线地址 |
+|------|---------|
+| 🎭 玩家头像 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu) |
+| 🧥 玩家皮肤 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu) |
+| 📊 服务器状态 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn) |
+| 📚 Swagger 文档 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html) |
 
 ## 📦 快速开始
 
@@ -88,6 +103,8 @@ cd mc-skin-wrap_<version>_<os>_<arch>
 ./mc-skin-wrap-go        # Linux/macOS
 ./mc-skin-wrap-go.exe    # Windows
 ```
+
+> 💡 **保持后台运行**: Linux/macOS 推荐使用 `screen` 或 `tmux` 挂在后台；Windows 保持 CMD / PowerShell 窗口开着即可。
 
 ### Python 版本（用于原型开发）
 

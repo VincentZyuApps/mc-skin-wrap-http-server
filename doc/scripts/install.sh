@@ -8,9 +8,6 @@
 # 指定版本安装:
 #   MC_SKIN_WRAP_VERSION=v0.0.2-beta.4+20260311 bash -c "$(curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/mc-skin-wrap-http-server/main/doc/scripts/install.sh)"
 #
-# 国内加速 (通过 GitHub Proxy):
-#   curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/VincentZyuApps/mc-skin-wrap-http-server/main/doc/scripts/install.sh | bash
-#
 # 支持的系统: Linux (Debian, Ubuntu, Arch, Alpine, Fedora, CentOS, etc.)
 # 支持的架构: x86_64 (amd64), aarch64 (arm64)
 # ============================================================
@@ -301,11 +298,11 @@ fi
 # ============================================================
 
 echo ""
-echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║${NC}  ${GREEN}✓ 部署脚本执行完成${NC}                                           ${CYAN}║${NC}"
-echo -e "${CYAN}║${NC}                                                                  ${CYAN}║${NC}"
-echo -e "${CYAN}║${NC}  📦 版本: ${VERSION}                                     ${CYAN}║${NC}"
-echo -e "${CYAN}║${NC}  📖 文档: https://github.com/${REPO}        ${CYAN}║${NC}"
-echo -e "${CYAN}║${NC}  🐛 问题: https://github.com/${REPO}/issues ${CYAN}║${NC}"
-echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════╝${NC}"
+echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║${NC}  ${GREEN}✓ 部署脚本执行完成${NC}"
+echo -e "${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}  📦 版本: ${VERSION}"
+echo -e "${CYAN}║${NC}  📖 文档: https://github.com/${REPO}"
+echo -e "${CYAN}║${NC}  🐛 问题: https://github.com/${REPO}/issues"
+echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
 echo ""
