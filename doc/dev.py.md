@@ -97,7 +97,36 @@ curl "http://${H}:${P}${R}/docs"
 
 ## 🌐 浏览器 URLs
 
-- **头像**: `http://127.0.0.1:58418/fastapi_skin_wrap/mcjava/avatar/VincentZyu`
-- **皮肤**: `http://127.0.0.1:58418/fastapi_skin_wrap/mcjava/skin/VincentZyu`
-- **服务器状态**: `http://127.0.0.1:58418/fastapi_skin_wrap/mcjava/server_status/mc.hypixel.net`
-- **Swagger 文档**: `http://127.0.0.1:58418/fastapi_skin_wrap/docs`
+> 💡 使用上面定义的环境变量 `$H`, `$P`, `$R` 拼接 URL
+
+### PowerShell
+
+```powershell
+# 头像
+echo "http://${H}:${P}${R}/mcjava/avatar/VincentZyu"
+
+# 皮肤
+echo "http://${H}:${P}${R}/mcjava/skin/VincentZyu"
+
+# 服务器状态
+echo "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"
+
+# Swagger 文档 (FastAPI 自带)
+echo "http://${H}:${P}${R}/docs"
+```
+
+### Bash
+
+```bash
+# 头像
+echo "http://${H}:${P}${R}/mcjava/avatar/VincentZyu"
+
+# 皮肤
+echo "http://${H}:${P}${R}/mcjava/skin/VincentZyu"
+
+# 服务器状态
+echo "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"
+
+# Swagger 文档 (FastAPI 自带)
+echo "http://${H}:${P}${R}/docs"
+```

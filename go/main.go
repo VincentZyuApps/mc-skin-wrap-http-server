@@ -20,7 +20,21 @@ import (
 	_ "mc-skin-wrap-go/docs" // 导入自动生成的文档
 )
 
-const Version = "0.0.2-beta.4+20260311"
+const Version = "0.0.2-beta.5+20260311"
+
+const banner = `
+    __  _________    _____ __ __ _____   __    _       ______  ___    ____ 
+   /  |/  / ____/   / ___// //_//  _/ | / /   | |     / / __ \/   |  / __ \
+  / /|_/ / /  ______\__ \/ ,<   / //  |/ /____| | /| / / /_/ / /| | / /_/ /
+ / /  / / /__/_____/__/ / /| |_/ // /|  /_____/ |/ |/ / _, _/ ___ |/ ____/ 
+/_/  /_/\____/    /____/_/ |_/___/_/ |_/      |__/|__/_/ |_/_/  |_/_/      
+
+   __________        ___________   __
+  / ____/ __ \      / ____/  _/ | / /
+ / / __/ / / /_____/ / __ / //  |/ / 
+/ /_/ / /_/ /_____/ /_/ // // /|  /  
+\____/\____/      \____/___/_/ |_/   
+`
 
 type Config struct {
 	Host          string `json:"host"`
@@ -87,6 +101,9 @@ func initHTTPClient() {
 // @host			127.0.0.1:60311
 // @BasePath		/gin_skin_wrap
 func main() {
+	fmt.Print(banner)
+	fmt.Printf("                                                    v%s\n\n", Version)
+
 	configPath := pflag.StringP("config", "c", "config.json", "path to config file")
 	pflag.Parse()
 

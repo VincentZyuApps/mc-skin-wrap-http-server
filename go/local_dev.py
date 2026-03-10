@@ -187,7 +187,6 @@ def generate_commands(extract_path: str, goos: str, host: str, port: int, root_p
     """生成各种命令并输出"""
     path_slash = extract_path.replace("\\", "/")
     binary = f"./{APP_NAME}.exe" if goos == "windows" else f"./{APP_NAME}"
-    base_url = f"http://{host}:{port}{root_path}"
     
     # ========== 运行命令 ==========
     print(f"\n{Color.BRIGHT_CYAN}{'='*60}{Color.RESET}")
@@ -247,17 +246,20 @@ def generate_commands(extract_path: str, goos: str, host: str, port: int, root_p
     print(f"{Color.BOLD}🌐 Browser URLs{Color.RESET}")
     print(f"{Color.BRIGHT_CYAN}{'='*60}{Color.RESET}")
     
-    print(f"\n{Color.YELLOW}Avatar:{Color.RESET}")
-    print(f"{base_url}/mcjava/avatar/VincentZyu")
-    
-    print(f"\n{Color.YELLOW}Skin:{Color.RESET}")
-    print(f"{base_url}/mcjava/skin/VincentZyu")
-    
-    print(f"\n{Color.YELLOW}Server Status:{Color.RESET}")
-    print(f"{base_url}/mcjava/server_status/mc.hypixel.net")
-    
-    print(f"\n{Color.YELLOW}Swagger Docs:{Color.RESET}")
-    print(f"{base_url}/docs/")
+    if goos == "windows":
+        # PowerShell 语法
+        print(f"\n{Color.YELLOW}# PowerShell - 生成浏览器 URL:{Color.RESET}")
+        print('echo "http://${H}:${P}${R}/mcjava/avatar/VincentZyu"      # Avatar')
+        print('echo "http://${H}:${P}${R}/mcjava/skin/VincentZyu"        # Skin')
+        print('echo "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"  # Server Status')
+        print('echo "http://${H}:${P}${R}/docs/"                         # Swagger Docs')
+    else:
+        # Bash 语法
+        print(f"\n{Color.YELLOW}# Bash - 生成浏览器 URL:{Color.RESET}")
+        print('echo "http://${H}:${P}${R}/mcjava/avatar/VincentZyu"      # Avatar')
+        print('echo "http://${H}:${P}${R}/mcjava/skin/VincentZyu"        # Skin')
+        print('echo "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"  # Server Status')
+        print('echo "http://${H}:${P}${R}/docs/"                         # Swagger Docs')
     
     print(f"\n{Color.BRIGHT_CYAN}{'='*60}{Color.RESET}\n")
 

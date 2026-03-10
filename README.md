@@ -51,6 +51,30 @@
 
 ## 📦 快速开始
 
+### 🐧 Linux 一键部署（推荐）
+
+在你的海外 Linux 服务器上执行：
+
+```bash
+# 直接安装最新版（GitHub）
+curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/mc-skin-wrap-http-server/main/doc/scripts/install.sh | bash
+
+# 安装指定版本
+MC_SKIN_WRAP_VERSION=v0.0.2-beta.5 bash -c "$(curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/mc-skin-wrap-http-server/main/doc/scripts/install.sh)"
+```
+
+**🇨🇳 国内 Gitee 镜像（大陆用户推荐）：**
+
+```bash
+# 从 Gitee 安装
+curl -fsSL https://gitee.com/vincent-zyu/mc-skin-wrap-http-server/raw/main/doc/scripts/install_gitee.sh | bash
+
+# 安装指定版本
+MC_SKIN_WRAP_VERSION=v0.0.2-beta.5 bash -c "$(curl -fsSL https://gitee.com/vincent-zyu/mc-skin-wrap-http-server/raw/main/doc/scripts/install_gitee.sh)"
+```
+
+脚本会自动检测系统架构 (x64/ARM64)，显示最近 10 个可用版本，交互式引导安装。
+
 ### Go 版本（推荐生产环境）
 
 ```bash
@@ -82,7 +106,7 @@ uv run python main.py
 | `GET /mcjava/avatar/{name}` | 获取玩家头像 (PNG) |
 | `GET /mcjava/skin/{name}` | 获取玩家皮肤 (PNG) |
 | `GET /mcjava/server_status/{addr}` | 获取 Java 服务器状态 (JSON) |
-| `GET /docs/` | Swagger UI（仅 Go 版） |
+| `GET /docs/` | Swagger UI (Go: gin-swagger, Python: FastAPI 自带) |
 
 ## ⚙️ 配置说明
 
@@ -101,7 +125,7 @@ uv run python main.py
 }
 ```
 
-## � 项目结构
+## 📁 项目结构
 
 ```
 mc-skin-wrap-http-server/
@@ -120,6 +144,6 @@ mc-skin-wrap-http-server/
 └── dist/               # 📦 构建产物
 ```
 
-## �📜 许可证
+## 📜许可证
 
 MIT License
