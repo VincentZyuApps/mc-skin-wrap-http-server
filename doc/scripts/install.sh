@@ -161,11 +161,19 @@ fi
 PLAIN_VER="${VERSION#v}"
 FILENAME="mc-skin-wrap_${PLAIN_VER}_linux_${ARCH_NAME}.tar.gz"
 
+# URL 编码 + 号为 %2B（GitHub API/URL 中 + 会被解读为空格）
+ENCODED_VERSION=$(echo "$VERSION" | sed 's/+/%2B/g')
+ENCODED_FILENAME=$(echo "$FILENAME" | sed 's/+/%2B/g')
+
 # 获取指定版本的 release 信息
-RELEASE_API="https://api.github.com/repos/${REPO}/releases/tags/${VERSION}"
+RELEASE_API="https://api.github.com/repos/${REPO}/releases/tags/${ENCODED_VERSION}"
 RELEASE_JSON=$($FETCH_CMD "$RELEASE_API" 2>/dev/null) || error "无法获取版本 ${VERSION} 的信息"
 
-DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -oP '"browser_download_url":\s*"\K[^"]+' | grep "$FILENAME" | head -1)
+# 尝试匹配下载链接（兼容 + 和 %2B 两种形式）
+DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -oP '"browser_download_url":\s*"\K[^"]+' | grep -F "$FILENAME" | head -1)
+if [ -z "$DOWNLOAD_URL" ]; then
+    DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -oP '"browser_download_url":\s*"\K[^"]+' | grep -F "$ENCODED_FILENAME" | head -1)
+fi
 
 if [ -z "$DOWNLOAD_URL" ]; then
     error "找不到适合当前系统的下载文件: $FILENAME"
