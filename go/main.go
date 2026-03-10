@@ -20,7 +20,7 @@ import (
 	_ "mc-skin-wrap-go/docs" // 导入自动生成的文档
 )
 
-const Version = "0.0.2-beta.5+20260311"
+const Version = "0.0.2-beta.6+20260311"
 
 const banner = `
     __  _________    _____ __ __ _____   __    _       ______  ___    ____ 
