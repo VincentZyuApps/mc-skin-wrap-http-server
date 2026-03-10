@@ -190,3 +190,83 @@ jobs:
           name: Release ${{ needs.check.outputs.version }}
           files: artifacts/*
 
+  # ── Sync Release to Gitee ─────────────────────────────
+  sync-gitee-release:
+    name: 【Gitee码云】Sync Release
+    needs: [check, release]
+    if: needs.check.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Release Assets from GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release_assets
+          VERSION="${{ needs.check.outputs.version }}"
+          echo "📦 Downloading assets for $VERSION"
+          
+          # List and download all assets from the GitHub release
+          gh release download "$VERSION" --dir release_assets || {
+            echo "⚠️ No assets found or download failed"
+            exit 0
+          }
+          
+          echo "📋 Downloaded files:"
+          ls -la release_assets/
+
+      - name: Create Gitee Release and Upload Assets
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          VERSION="${{ needs.check.outputs.version }}"
+          OWNER="vincent-zyu"
+          REPO="mc-skin-wrap-http-server"
+          
+          echo "🚀 Creating Gitee release $VERSION"
+          
+          # Create release via Gitee API
+          RESPONSE=$(curl -s -X POST \
+            "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"access_token\": \"${GITEE_TOKEN}\",
+              \"tag_name\": \"${VERSION}\",
+              \"name\": \"Release ${VERSION}\",
+              \"body\": \"Synced from GitHub Release\",
+              \"target_commitish\": \"main\"
+            }")
+          
+          RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
+          
+          if [ -z "$RELEASE_ID" ]; then
+            echo "⚠️ Failed to create release or release already exists"
+            echo "Response: $RESPONSE"
+            # Try to get existing release
+            RELEASE_ID=$(curl -s "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases/tags/${VERSION}?access_token=${GITEE_TOKEN}" | jq -r '.id // empty')
+          fi
+          
+          if [ -z "$RELEASE_ID" ]; then
+            echo "❌ Could not get release ID, skipping asset upload"
+            exit 0
+          fi
+          
+          echo "✅ Release ID: $RELEASE_ID"
+          
+          # Upload each asset
+          for file in release_assets/*; do
+            if [ -f "$file" ]; then
+              FILENAME=$(basename "$file")
+              echo "📤 Uploading $FILENAME..."
+              
+              curl -s -X POST \
+                "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases/${RELEASE_ID}/attach_files" \
+                -H "Content-Type: multipart/form-data" \
+                -F "access_token=${GITEE_TOKEN}" \
+                -F "file=@${file}" || echo "⚠️ Failed to upload $FILENAME"
+            fi
+          done
+          
+          echo "✅ Gitee release sync completed"

@@ -1,47 +1,62 @@
-## python version
-`3.12.5`
+# Python 开发指南
 
-### cp config file
-```
+> 🐍 Python 版本适合**原型开发**和**概念验证**，生产环境推荐使用 Go 版本。
+
+## 📦 环境要求
+
+- Python: `>= 3.12`
+- 依赖: FastAPI + Uvicorn + Requests
+
+## 🚀 快速开始
+
+### 1️⃣ 复制配置文件
+
+```bash
 cd py
 cp config.example.json config.json
+# 按需修改 config.json
 ```
 
-### venv
+### 2️⃣ 方式一: 传统 venv
+
 ```bash
+# 创建虚拟环境
 python -m venv venv
-./venv/Scripts/Activate #win
 
-source ./venv/bin/activate #linux
+# 激活虚拟环境
+./venv/Scripts/Activate     # Windows
+source ./venv/bin/activate  # Linux/macOS
 
-pip install fastapi uvicorn requests
-pip freeze > requirements.txt
+# 安装依赖
 pip install -r requirements.txt
 
-# 启动（配置项在 py/config.json 中设置）
-cd py
-uvicorn main:app --reload   # 或者直接: python main.py --reload
+# 启动服务
 python main.py              # 生产模式
-
+python main.py --reload     # 开发模式 (热重载)
 ```
 
-### uv
-```shell
+### 2️⃣ 方式二: uv (推荐 🚀)
+
+[uv](https://docs.astral.sh/uv/) 是 Rust 写的超快 Python 包管理器。
+
+```bash
+# 创建虚拟环境
 uv venv --python 3.12
 
-uv pip install fastapi uvicorn requests
-uv pip freeze > requirements.txt
-pip install -r requirements.txt
+# 安装依赖
+uv pip install -r requirements.txt
 
-# 启动（配置项在 py/config.json 中设置，不需要再写一长串参数了）
-cd py
-uv run python main.py --reload   # 开发模式（热重载）
-uv run python main.py            # 生产模式
+# 启动服务
+uv run python main.py              # 生产模式
+uv run python main.py --reload     # 开发模式 (热重载)
 ```
 
-## curl test
+---
+
+## 🧪 curl 测试
 
 ### PowerShell
+
 ```powershell
 $H = "127.0.0.1"
 $P = 58418
@@ -56,18 +71,12 @@ curl "http://${H}:${P}${R}/mcjava/skin/VincentZyu" -o skin.png
 # 获取服务器状态
 curl "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"
 
-# FastAPI 自动生成的文档页
+# FastAPI 自动生成的 Swagger 文档页
 curl "http://${H}:${P}${R}/docs"
-
-# 输出完整 URL (方便复制到浏览器/Postman)
-Write-Host "`n===== URLs =====" -ForegroundColor Cyan
-Write-Host "Avatar:"; Write-Host "http://${H}:${P}${R}/mcjava/avatar/VincentZyu"
-Write-Host "Skin:"; Write-Host "http://${H}:${P}${R}/mcjava/skin/VincentZyu"
-Write-Host "Status:"; Write-Host "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"
-Write-Host "Docs:"; Write-Host "http://${H}:${P}${R}/docs"
 ```
 
 ### Bash
+
 ```bash
 H="127.0.0.1"
 P=58418
@@ -82,13 +91,13 @@ curl "http://${H}:${P}${R}/mcjava/skin/VincentZyu" -o skin.png
 # 获取服务器状态
 curl "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"
 
-# FastAPI 自动生成的文档页
+# FastAPI 自动生成的 Swagger 文档页
 curl "http://${H}:${P}${R}/docs"
-
-# 输出完整 URL (方便复制到浏览器/Postman)
-echo -e "\n===== URLs ====="
-echo "Avatar:"; echo "http://${H}:${P}${R}/mcjava/avatar/VincentZyu"
-echo "Skin:"; echo "http://${H}:${P}${R}/mcjava/skin/VincentZyu"
-echo "Status:"; echo "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"
-echo "Docs:"; echo "http://${H}:${P}${R}/docs"
 ```
+
+## 🌐 浏览器 URLs
+
+- **头像**: `http://127.0.0.1:58418/fastapi_skin_wrap/mcjava/avatar/VincentZyu`
+- **皮肤**: `http://127.0.0.1:58418/fastapi_skin_wrap/mcjava/skin/VincentZyu`
+- **服务器状态**: `http://127.0.0.1:58418/fastapi_skin_wrap/mcjava/server_status/mc.hypixel.net`
+- **Swagger 文档**: `http://127.0.0.1:58418/fastapi_skin_wrap/docs`

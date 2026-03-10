@@ -35,6 +35,7 @@ desktop.ini
 *.log
 *.tmp
 *.bak
+**/tmp/
 
 # ========== 环境变量 ==========
 .env

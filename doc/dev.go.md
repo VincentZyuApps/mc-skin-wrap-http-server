@@ -1,15 +1,15 @@
 # Go 开发指南
 
-## 📦 依赖准备
+> 🦀 Go 版本是**生产环境首选**：高性能、低内存、单二进制部署。
 
-Go 版本要求: `>= 1.24`
+## 📦 环境要求
+
+- Go: `>= 1.24`
+- Python: 用于构建脚本 (`build.py`, `local_dev.py`)
 
 ```bash
-# 进入 go 目录
 cd go
-
-# 初始化依赖 (如果需要)
-go mod tidy
+go mod tidy  # 初始化依赖
 ```
 
 ---
@@ -60,9 +60,12 @@ python3 go/build.py --os linux --arch amd64
 ```
 
 
-## curl test
+---
+
+## 🧪 curl 测试
 
 ### PowerShell
+
 ```powershell
 $H = "127.0.0.1"
 $P = 60311
@@ -79,16 +82,10 @@ curl "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"
 
 # Swagger 文档页
 curl "http://${H}:${P}${R}/docs/"
-
-# 输出完整 URL (方便复制到浏览器/Postman)
-Write-Host "`n===== URLs =====" -ForegroundColor Cyan
-Write-Host "Avatar:"; Write-Host "http://${H}:${P}${R}/mcjava/avatar/VincentZyu"
-Write-Host "Skin:"; Write-Host "http://${H}:${P}${R}/mcjava/skin/VincentZyu"
-Write-Host "Status:"; Write-Host "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"
-Write-Host "Docs:"; Write-Host "http://${H}:${P}${R}/docs/"
 ```
 
 ### Bash
+
 ```bash
 H="127.0.0.1"
 P=60311
@@ -105,21 +102,23 @@ curl "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"
 
 # Swagger 文档页
 curl "http://${H}:${P}${R}/docs/"
-
-# 输出完整 URL (方便复制到浏览器/Postman)
-echo -e "\n===== URLs ====="
-echo "Avatar:"; echo "http://${H}:${P}${R}/mcjava/avatar/VincentZyu"
-echo "Skin:"; echo "http://${H}:${P}${R}/mcjava/skin/VincentZyu"
-echo "Status:"; echo "http://${H}:${P}${R}/mcjava/server_status/mc.hypixel.net"
-echo "Docs:"; echo "http://${H}:${P}${R}/docs/"
 ```
 
-## local dev py script
+## 🌐 浏览器 URLs
 
-本地开发辅助脚本，自动完成以下工作：
-- 更新本文档中的版本号和环境变量 (`$H`, `$P`, `$R`)
-- 解压当前架构的压缩包 (已存在则跳过，除非 `--clear`)
-- 输出 cd + 运行命令 + curl 测试命令 + 浏览器 URL
+- **头像**: `http://127.0.0.1:60311/gin_skin_wrap/mcjava/avatar/VincentZyu`
+- **皮肤**: `http://127.0.0.1:60311/gin_skin_wrap/mcjava/skin/VincentZyu`
+- **服务器状态**: `http://127.0.0.1:60311/gin_skin_wrap/mcjava/server_status/mc.hypixel.net`
+- **Swagger 文档**: `http://127.0.0.1:60311/gin_skin_wrap/docs/`
+
+---
+
+## 🛠️ 本地开发辅助脚本
+
+`local_dev.py` 一键完成：
+- 📝 自动更新本文档中的版本号和测试参数
+- 📦 解压当前架构的构建产物 (已存在则跳过)
+- 🖥️ 输出运行命令 + curl 测试命令 + 浏览器 URL
 
 ```bash
 python ./go/local_dev.py --help
