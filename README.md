@@ -13,6 +13,11 @@
 [![Linux x64 | ARM64](https://img.shields.io/badge/Linux-x64_|_ARM64-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://github.com/VincentZyuApps/mc-skin-wrap-http-server/releases)
 [![macOS x64 | ARM64](https://img.shields.io/badge/macOS-x64_|_ARM64-000000?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/VincentZyuApps/mc-skin-wrap-http-server/releases)
 
+<p><del>💬 使用问题 / 🐛 Bug反馈 / 👨‍💻 开发交流，聊天吹水，欢迎加入QQ群：<b>259248174</b>   🎉（这个群G了</del> </p> 
+<p>💬 使用问题 / 🐛 Bug反馈 / 👨‍💻 开发交流，聊天吹水，欢迎加入QQ群：<b>1085190201</b> 🎉</p>
+<p>💡 在群里直接艾特我，回复的更快哦~ ✨</p>
+
+
 ## 🚀 简介
 
 **MC Skin Wrap** 是一个简单的 HTTP 服务器，封装了常用的 Minecraft 相关 API，提供统一接口：
@@ -66,6 +71,12 @@
 > （2RMB/月的小鸡，上面没别的东西，被打了就打了，就当玩了 😂）
 >
 > ✨ 开源代码不够，还免费提供公开接口 —— 如此慷慨的作者，不来个 ⭐ Star 说不过去吧？
+>
+> 🖥️ 2RMB/月的 [狐蒂云](https://www.foxcloud.net/) 小鸡，到期时间：**2026-08-19 18:29**
+>
+> 📢 怕作者忘记续费？欢迎在 [Issue](https://github.com/VincentZyuApps/mc-skin-wrap-http-server/issues) 或 QQ 群里提醒我续费~ （防止自己忘记捏 😋）
+
+**① 直连 — Nginx + Let's Encrypt（无 CDN）**
 
 | 接口 | 在线地址 |
 |------|---------|
@@ -73,6 +84,38 @@
 | 🧥 玩家皮肤 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu) |
 | 📊 服务器状态 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn) |
 | 📚 Swagger 文档 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html) |
+
+**② 腾讯 EdgeOne CDN 加速 — 全球节点 + 边缘缓存**
+
+| 接口 | 在线地址 |
+|------|---------|
+| 🎭 玩家头像 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu) |
+| 🧥 玩家皮肤 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu) |
+| 📊 服务器状态 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn) |
+| 📚 Swagger 文档 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html) |
+
+**③ Cloudflare CDN — 隐藏源站 IP + DDoS 防护 + 缓存**
+
+| 接口 | 在线地址 |
+|------|---------|
+| 🎭 玩家头像 | [https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu) |
+| 🧥 玩家皮肤 | [https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu) |
+| 📊 服务器状态 | [https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn) |
+| 📚 Swagger 文档 | [https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html) |
+
+> **三种接入方式对比：**
+>
+> | 特性 | ① 直连 | ② EdgeOne | ③ Cloudflare |
+> |------|:---:|:---:|:---:|
+> | SSL 证书 | Let's Encrypt (自管) | EdgeOne 托管 | CF 自动签发 |
+> | CDN 缓存 | ❌ | ✅ 图片缓存 30 天 | ✅ 静态资源自动缓存 |
+> | 隐藏源站 IP | ❌ | ✅ | ✅ |
+> | DDoS 防护 | ❌ | ✅ 基础防护 | ✅ 基础防护 |
+> | 大陆加速 | ❌ | ✅ 全球节点(含亚太) | ⚠️ 免费版无大陆节点 |
+> | 海外加速 | ❌ | ✅ | ✅ |
+> | 配置复杂度 | Nginx + certbot | 需配置回源 + 证书 | 一键开橙色云 |
+>
+> 💡 **推荐**: 大陆用户优先使用 ② EdgeOne 线路；海外用户三条线路体验接近。
 
 ## 📦 快速开始
 
