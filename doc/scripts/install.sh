@@ -76,6 +76,20 @@ esac
 info "检测到系统: ${CYAN}${OS} ${ARCH}${NC} → 将下载 ${CYAN}linux_${ARCH_NAME}${NC} 版本"
 
 # ============================================================
+# 检查是否通过管道执行
+# ============================================================
+
+# 如果是 curl | bash 方式，无法读取 stdin 输入，需要重定向
+if [ ! -t 0 ]; then
+    # 尝试从未被重定向的终端读取
+    if [ -t 1 ]; then
+        exec < /dev/tty
+    elif [ -t 2 ]; then
+        exec < /dev/tty
+    fi
+fi
+
+# ============================================================
 # 获取版本列表
 # ============================================================
 
@@ -252,6 +266,19 @@ if [[ "$CONFIRM_EXTRACT" =~ ^[Yy]$ ]] || [ -z "$CONFIRM_EXTRACT" ]; then
     tar -xzf "$FILENAME" || error "解压失败"
     
     success "解压完成"
+
+    # 询问是否删除压缩包
+    echo ""
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -n -e "${BLUE}[?]${NC} 是否删除压缩包? [Y/n]: "
+    read -r CONFIRM_REMOVE
+    
+    CONFIRM_REMOVE=${CONFIRM_REMOVE:-Y}
+    
+    if [[ "$CONFIRM_REMOVE" =~ ^[Yy]$ ]] || [ -z "$CONFIRM_REMOVE" ]; then
+        rm "$FILENAME"
+        success "已删除压缩包"
+    fi
     
     # 查找二进制文件
     BINARY_PATH="${INSTALL_DIR}/${EXTRACT_DIR}/mc-skin-wrap-go"
@@ -267,21 +294,20 @@ if [[ "$CONFIRM_EXTRACT" =~ ^[Yy]$ ]] || [ -z "$CONFIRM_EXTRACT" ]; then
         CONFIRM_CD=${CONFIRM_CD:-Y}
         
         if [[ "$CONFIRM_CD" =~ ^[Yy]$ ]] || [ -z "$CONFIRM_CD" ]; then
-            BINARY_DIR="${INSTALL_DIR}/${EXTRACT_DIR}"
-            
+            cd "${INSTALL_DIR}/${EXTRACT_DIR}"
             echo ""
             echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-            success "安装完成！"
+            success "已进入目录: $(pwd)"
+            echo -e "[INFO] 你现在可以直接运行: ./mc-skin-wrap-go"
             echo ""
-            info "由于脚本在子 shell 中运行，请手动执行以下命令："
-            echo ""
-            echo -e "  ${GREEN}cd ${BINARY_DIR}${NC}"
-            echo -e "  ${GREEN}./mc-skin-wrap-go${NC}"
-            echo ""
-            info "或者直接运行："
-            echo ""
-            echo -e "  ${GREEN}${BINARY_PATH}${NC}"
-            echo ""
+            # 尝试生成一个新的 shell 以保持在目录中，或者提示用户
+            if [ -n "$BASH" ]; then
+                 exec "$BASH"
+            elif [ -n "$ZSH_NAME" ]; then
+                 exec "$ZSH_NAME"
+            else
+                 exec sh
+            fi
         fi
     else
         warn "未找到二进制文件，请检查解压内容"
