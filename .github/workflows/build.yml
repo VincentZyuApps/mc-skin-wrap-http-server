@@ -308,77 +308,180 @@ jobs:
     needs: [check, release]
     if: needs.check.outputs.should_release == 'true'
     runs-on: ubuntu-latest
+    env:
+      GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+      GITEE_OWNER: vincent-zyu
+      GITEE_REPO: mc-skin-wrap-http-server
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Download Release Assets from GitHub
+      - name: Get release info from GitHub
+        id: release_info
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p release_assets
-          VERSION="${{ needs.check.outputs.version }}"
-          echo "📦 Downloading assets for $VERSION"
-          
-          # List and download all assets from the GitHub release
-          gh release download "$VERSION" --dir release_assets || {
-            echo "⚠️ No assets found or download failed"
-            exit 0
-          }
-          
-          echo "📋 Downloaded files:"
-          ls -la release_assets/
+          TAG="${{ needs.check.outputs.version }}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Create Gitee Release and Upload Assets
+          RELEASE_INFO=$(gh release view "$TAG" --json name,body,assets)
+          echo "release_name=$(echo "$RELEASE_INFO" | jq -r '.name')" >> "$GITHUB_OUTPUT"
+          echo "$RELEASE_INFO" | jq -r '.body' > release_body.md
+
+          echo "📦 Release: $TAG"
+          echo "📝 Assets:"
+          echo "$RELEASE_INFO" | jq -r '.assets[].name'
+
+      - name: Download GitHub Release assets
         env:
-          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION="${{ needs.check.outputs.version }}"
-          OWNER="vincent-zyu"
-          REPO="mc-skin-wrap-http-server"
-          
-          echo "🚀 Creating Gitee release $VERSION"
-          
-          # Create release via Gitee API
-          RESPONSE=$(curl -s -X POST \
-            "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"access_token\": \"${GITEE_TOKEN}\",
-              \"tag_name\": \"${VERSION}\",
-              \"name\": \"Release ${VERSION}\",
-              \"body\": \"Synced from GitHub Release\",
-              \"target_commitish\": \"main\"
-            }")
-          
-          RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
-          
-          if [ -z "$RELEASE_ID" ]; then
-            echo "⚠️ Failed to create release or release already exists"
-            echo "Response: $RESPONSE"
-            # Try to get existing release
-            RELEASE_ID=$(curl -s "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases/tags/${VERSION}?access_token=${GITEE_TOKEN}" | jq -r '.id // empty')
+          TAG="${{ steps.release_info.outputs.tag }}"
+          mkdir -p assets
+          cd assets
+          gh release download "$TAG" --pattern "*"
+          echo "📥 Downloaded files:"
+          ls -la
+
+      - name: Create or find Gitee Release
+        id: gitee_release
+        run: |
+          TAG="${{ steps.release_info.outputs.tag }}"
+          NAME="${{ steps.release_info.outputs.release_name }}"
+
+          # JSON 安全转义 release body
+          JSON_BODY=$(jq -R -s '.' < release_body.md)
+
+          # 1. 确保 tag 存在于 Gitee
+          if curl -s --fail "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/tags/${TAG}?access_token=${GITEE_TOKEN}" > /dev/null 2>&1; then
+            echo "🏷️ Tag $TAG already exists on Gitee"
+          else
+            echo "🏷️ Creating tag $TAG on Gitee..."
+            curl -s -X POST --header 'Content-Type: application/json;charset=UTF-8' \
+              "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/tags" \
+              -d "{\"access_token\":\"${GITEE_TOKEN}\",\"tag_name\":\"${TAG}\",\"refs\":\"main\",\"tag_message\":\"Release ${TAG}\"}"
           fi
-          
-          if [ -z "$RELEASE_ID" ]; then
-            echo "❌ Could not get release ID, skipping asset upload"
-            exit 0
+
+          # 2. 检查是否已有对应 tag 的 Release
+          EXISTING=$(curl -s "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases/tags/${TAG}?access_token=${GITEE_TOKEN}")
+          RELEASE_ID=$(echo "$EXISTING" | jq -r '.id')
+
+          if [ -n "$RELEASE_ID" ] && [ "$RELEASE_ID" != "null" ]; then
+            ASSET_COUNT=$(echo "$EXISTING" | jq '.assets | length')
+            echo "⚠️ Gitee release already exists (ID: $RELEASE_ID, assets: $ASSET_COUNT)"
+          else
+            echo "✅ No existing release, creating..."
+
+            RELEASE_PAYLOAD=$(jq -n \
+              --arg token "$GITEE_TOKEN" \
+              --arg tag "$TAG" \
+              --arg name "$NAME" \
+              --argjson body "$JSON_BODY" \
+              '{
+                access_token: $token,
+                tag_name: $tag,
+                name: $name,
+                body: $body,
+                target_commitish: "main",
+                prerelease: false
+              }')
+
+            CREATE_RESPONSE=$(curl -s -X POST --header 'Content-Type: application/json;charset=UTF-8' \
+              "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases" \
+              -d "$RELEASE_PAYLOAD")
+
+            RELEASE_ID=$(echo "$CREATE_RESPONSE" | jq -r '.id')
+            ASSET_COUNT=0
+
+            if [ "$RELEASE_ID" = "null" ] || [ -z "$RELEASE_ID" ]; then
+              echo "❌ Failed to create Gitee release"
+              echo "Response: $CREATE_RESPONSE"
+              exit 1
+            fi
+            echo "✅ Created Gitee release (ID: $RELEASE_ID)"
           fi
-          
-          echo "✅ Release ID: $RELEASE_ID"
-          
-          # Upload each asset
-          for file in release_assets/*; do
-            if [ -f "$file" ]; then
-              FILENAME=$(basename "$file")
-              echo "📤 Uploading $FILENAME..."
-              
-              curl -s -X POST \
-                "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases/${RELEASE_ID}/attach_files" \
-                -H "Content-Type: multipart/form-data" \
-                -F "access_token=${GITEE_TOKEN}" \
-                -F "file=@${file}" || echo "⚠️ Failed to upload $FILENAME"
+
+          echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
+          echo "asset_count=$ASSET_COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Upload assets to Gitee
+        if: steps.gitee_release.outputs.release_id != '' && steps.gitee_release.outputs.release_id != 'null'
+        run: |
+          RELEASE_ID="${{ steps.gitee_release.outputs.release_id }}"
+
+          ts() {
+            echo "[$(date -u '+%H:%M:%S UTC') / $(TZ='Asia/Shanghai' date '+%H:%M:%S CST')]"
+          }
+
+          echo "$(ts) 📤 Uploading assets to Gitee release (ID: $RELEASE_ID)"
+
+          SUCCESS=0
+          FAIL=0
+          TOTAL=$(ls -1 assets/ | wc -l)
+          CURRENT=0
+          echo "$(ts) 📁 Total files to upload: $TOTAL"
+
+          for FILE in assets/*; do
+            if [ -f "$FILE" ]; then
+              CURRENT=$((CURRENT + 1))
+              FILENAME=$(basename "$FILE")
+              FILESIZE=$(stat -c%s "$FILE" 2>/dev/null || stat -f%z "$FILE" 2>/dev/null)
+              FILESIZE_H=$(numfmt --to=iec $FILESIZE 2>/dev/null || echo "${FILESIZE} bytes")
+              echo ""
+              echo "$(ts) ──── [$CURRENT/$TOTAL] $FILENAME ($FILESIZE_H) ────"
+
+              UPLOADED=false
+              for ATTEMPT in 1 2 3; do
+                echo "$(ts)   🔄 Attempt $ATTEMPT/3 — starting curl (max-time=1200s, connect-timeout=30s)"
+
+                START_TIME=$(date +%s)
+                RESPONSE=$(curl -s --max-time 1200 --connect-timeout 30 \
+                  -w "\n%{http_code}" \
+                  -X POST --header "Content-Type: multipart/form-data" \
+                  -F "access_token=${GITEE_TOKEN}" \
+                  -F "file=@${FILE}" \
+                  "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases/${RELEASE_ID}/attach_files")
+                CURL_EXIT=$?
+                END_TIME=$(date +%s)
+                ELAPSED=$((END_TIME - START_TIME))
+
+                HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+                BODY=$(echo "$RESPONSE" | sed '$d')
+
+                echo "$(ts)   📡 curl exit=$CURL_EXIT, HTTP=$HTTP_CODE, took ${ELAPSED}s"
+
+                if [ $CURL_EXIT -ne 0 ]; then
+                  case $CURL_EXIT in
+                    28) echo "$(ts)   ⏱️ TIMEOUT: curl exceeded max-time (${ELAPSED}s)" ;;
+                    7)  echo "$(ts)   🔌 CONNECTION REFUSED: Gitee server unreachable" ;;
+                    56) echo "$(ts)   💥 RECV ERROR: connection reset during transfer" ;;
+                    *)  echo "$(ts)   ❓ CURL ERROR $CURL_EXIT" ;;
+                  esac
+                elif echo "$BODY" | jq -e '.browser_download_url' > /dev/null 2>&1; then
+                  URL=$(echo "$BODY" | jq -r '.browser_download_url')
+                  echo "$(ts)   ✅ SUCCESS: $URL"
+                  SUCCESS=$((SUCCESS + 1))
+                  UPLOADED=true
+                  break
+                else
+                  echo "$(ts)   ⚠️ UNEXPECTED RESPONSE (HTTP $HTTP_CODE):"
+                  echo "$(ts)   $(echo "$BODY" | head -c 300)"
+                fi
+
+                if [ $ATTEMPT -lt 3 ]; then
+                  echo "$(ts)   💤 Waiting 10s before retry..."
+                  sleep 10
+                fi
+              done
+
+              if [ "$UPLOADED" = false ]; then
+                echo "$(ts)   ❌ GAVE UP on $FILENAME after 3 attempts"
+                FAIL=$((FAIL + 1))
+              fi
             fi
           done
-          
-          echo "✅ Gitee release sync completed"
+
+          echo ""
+          echo "$(ts) ════════════════════════════════════════"
+          echo "$(ts) 📊 Upload summary: $SUCCESS/$TOTAL succeeded, $FAIL failed"
+          echo "$(ts) ════════════════════════════════════════"

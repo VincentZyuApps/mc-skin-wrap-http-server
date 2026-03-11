@@ -20,7 +20,7 @@ import (
 	docs "mc-skin-wrap-go/docs"
 )
 
-const Version = "0.0.3-beta.5+20260311"
+const Version = "0.0.3-rc.1+20260311"
 
 const banner = `
     __  _________    _____ __ __ _____   __    _       ______  ___    ____ 
