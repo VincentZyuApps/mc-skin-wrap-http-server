@@ -92,7 +92,9 @@
 | 🎭 玩家头像 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu) |
 | 🧥 玩家皮肤 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu) |
 | 📊 服务器状态 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn) |
-| 📚 Swagger 文档 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html) |
+| ~~📚 Swagger 文档~~ | ~~[https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html)~~ |
+
+> ⚠️ EdgeOne 线路的 Swagger 文档好像有点问题，懒得修了，反正其他两个线路的文档能用 😂
 
 **③ Cloudflare CDN — 隐藏源站 IP + DDoS 防护 + 缓存**
 
