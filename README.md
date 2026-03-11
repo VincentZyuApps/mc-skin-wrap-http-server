@@ -51,6 +51,7 @@
 | [📘 Go 开发指南](doc/dev.go.md) | 构建、测试、Swagger 文档生成、**一键 curl 测试命令** |
 | [📗 Python 开发指南](doc/dev.py.md) | 环境搭建、快速启动、**一键 curl 测试命令** |
 | [📙 Git 操作指南](doc/dev.git.md) | 生产环境同步、常用命令 |
+| [🚀 Go 生产部署指南](doc/prod.go.md) | 安装脚本、screen 后台、**Nginx 反代 + CORS 踩坑** |
 
 ### 🌐 在线体验
 
