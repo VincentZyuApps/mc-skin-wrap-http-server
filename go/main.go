@@ -20,7 +20,7 @@ import (
 	docs "mc-skin-wrap-go/docs"
 )
 
-const Version = "0.0.3-rc.1+20260311"
+const Version = "0.0.3-rc.4+20260311"
 
 const banner = `
     __  _________    _____ __ __ _____   __    _       ______  ___    ____ 
@@ -270,10 +270,21 @@ func main() {
 			faviconAbs, _ = filepath.Abs(faviconAbs)
 		}
 		if _, err := os.Stat(faviconAbs); err == nil {
-			base.GET("/favicon.ico", func(c *gin.Context) {
+			serveFavicon := func(c *gin.Context) {
+				c.Header("Content-Type", "image/x-icon")
+				c.Header("Cache-Control", "public, max-age=86400")
 				c.File(faviconAbs)
-			})
-			fmt.Printf("[INFO] Favicon: %s\n", faviconAbs)
+			}
+
+			// Register under prefix
+			base.GET("/favicon.ico", serveFavicon)
+			fmt.Printf("[INFO] Registered Prefix Favicon: %s/favicon.ico -> %s\n", rootPath, faviconAbs)
+
+			// Also register at root if prefix is not root
+			if rootPath != "/" && rootPath != "" {
+				r.GET("/favicon.ico", serveFavicon)
+				fmt.Printf("[INFO] Registered Root Favicon: /favicon.ico -> %s\n", faviconAbs)
+			}
 		} else {
 			fmt.Printf("[WARN] Favicon 文件未找到: %s\n", faviconAbs)
 		}
@@ -307,13 +318,73 @@ func main() {
 		ginSwagger.URL("../swagger_doc.json"),
 	)
 
+	// 构造自定义 Swagger index.html，使用我们自己的 favicon 而非 Swagger 内置的绿色图标
+	faviconLinkTag := ""
+	if config.FaviconPath != "" {
+		// 相对路径: docs/index.html → ../favicon.ico = prefix/favicon.ico
+		faviconLinkTag = `<link rel="icon" type="image/x-icon" href="../favicon.ico">`
+	}
+	customSwaggerHTML := fmt.Sprintf(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Swagger UI</title>
+  <link rel="stylesheet" type="text/css" href="./swagger-ui.css">
+  <link rel="stylesheet" type="text/css" href="./index.css">
+  %s
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="./swagger-ui-bundle.js" charset="UTF-8"></script>
+<script src="./swagger-ui-standalone-preset.js" charset="UTF-8"></script>
+<script>
+window.onload = function() {
+  SwaggerUIBundle({
+    url: "../swagger_doc.json",
+    dom_id: '#swagger-ui',
+    deepLinking: true,
+    presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+    plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+    layout: "StandaloneLayout"
+  });
+};
+</script>
+</body>
+</html>`, faviconLinkTag)
+
 	r.GET(docsPath, func(c *gin.Context) {
-		// Fix 404 on trailing slash access (e.g. /docs/)
-		// swaggo handler might not default to index.html for root path in all versions/setups
-		if c.Param("any") == "/" || c.Param("any") == "" {
+		param := c.Param("any")
+
+		// Redirect /docs/ → /docs/index.html
+		if param == "/" || param == "" {
 			c.Redirect(http.StatusMovedPermanently, "index.html")
 			return
 		}
+
+		// 自定义 index.html: 用我们的 favicon 替代 Swagger 内置的
+		if param == "/index.html" {
+			c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(customSwaggerHTML))
+			return
+		}
+
+		// 拦截 Swagger UI 内置 favicon 请求 (favicon-16x16.png, favicon-32x32.png)
+		// 返回我们自己的 favicon
+		if strings.Contains(param, "favicon") {
+			if config.FaviconPath != "" {
+				faviconAbs := config.FaviconPath
+				if !filepath.IsAbs(faviconAbs) {
+					faviconAbs, _ = filepath.Abs(faviconAbs)
+				}
+				if _, err := os.Stat(faviconAbs); err == nil {
+					c.Header("Content-Type", "image/x-icon")
+					c.Header("Cache-Control", "public, max-age=86400")
+					c.File(faviconAbs)
+					return
+				}
+			}
+		}
+
+		// 其余文件 (CSS, JS) 正常走 swaggo 内嵌文件
 		rawSwaggerHandler(c)
 	})
 
