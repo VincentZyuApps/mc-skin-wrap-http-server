@@ -3,7 +3,8 @@
 
 > 轻量级 HTTP 服务器，封装 Minecraft 皮肤/头像/服务器状态 API，适合自建代理服务。
 >
-> 🎯 **目标用户**: 大陆开发者 — 海外用户可直接调用原始 API，无需本项目。
+> 🎯 **目标用户**: 大陆开发者 or Minecraft玩家 等。
+> (因为海外用户可直接调用原始 API，无需本项目
 
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/VincentZyuApps/mc-skin-wrap-http-server)
 [![Gitee](https://img.shields.io/badge/Gitee-C71D23?style=for-the-badge&logo=gitee&logoColor=white)](https://gitee.com/vincent-zyu/mc-skin-wrap-http-server)

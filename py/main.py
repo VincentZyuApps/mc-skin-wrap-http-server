@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, APIRouter
-from fastapi.responses import Response, JSONResponse
+from fastapi.responses import Response, JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import json
@@ -8,8 +8,6 @@ import os
 import logging
 import time
 import uvicorn
-
-VERSION = "0.0.2-beta.4+20260311"
 
 BANNER = r"""
     __  _________    _____ __ __ _____   __    _       ______  ___    ____ 
@@ -27,18 +25,31 @@ BANNER = r"""
 
 def print_banner():
     print(BANNER)
-    print(f"                                                          v{VERSION}\n")
+
+# ========== 命令行参数 early exit ==========
+if "--help" in sys.argv or "-h" in sys.argv:
+    print(BANNER)
+    print("用法: python main.py [选项]")
+    print()
+    print("选项:")
+    print("  -c, --config <path>  配置文件路径 (默认: config.json)")
+    print("  --reload             启用热重载 (uvicorn)")
+    print("  -h, --help           显示此帮助信息")
+    sys.exit(0)
 
 # ========== 加载配置 ==========
 def load_config() -> dict:
-    # 优先从命令行参数 -c 获取配置文件路径
     config_path = "config.json"
-    if "-c" in sys.argv:
-        try:
-            config_path = sys.argv[sys.argv.index("-c") + 1]
-        except IndexError:
-            print("[ERROR] -c 参数后必须指定配置文件路径")
-            sys.exit(1)
+
+    # 支持 -c / --config 两种写法
+    for flag in ("-c", "--config"):
+        if flag in sys.argv:
+            try:
+                config_path = sys.argv[sys.argv.index(flag) + 1]
+            except IndexError:
+                print(f"[ERROR] {flag} 参数后必须指定配置文件路径")
+                sys.exit(1)
+            break
     
     # 如果没通过参数指定，则尝试读取同目录下的 config.json
     if not os.path.isabs(config_path):
@@ -154,6 +165,19 @@ app.add_middleware(
 )
 
 router = APIRouter(prefix=root_path)
+
+# Favicon
+_favicon_path = config.get("favicon_path", "")
+if _favicon_path:
+    if not os.path.isabs(_favicon_path):
+        _favicon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), _favicon_path)
+    if os.path.exists(_favicon_path):
+        @router.get("/favicon.ico", include_in_schema=False)
+        def get_favicon():
+            return FileResponse(_favicon_path, media_type="image/x-icon")
+        logger.info(f"Favicon: {_favicon_path}")
+    else:
+        logger.warning(f"Favicon 文件未找到: {_favicon_path}")
 
 
 # 获取头像（方形头像）

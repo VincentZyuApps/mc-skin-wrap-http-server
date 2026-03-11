@@ -20,7 +20,7 @@ import (
 	docs "mc-skin-wrap-go/docs"
 )
 
-const Version = "0.0.3-beta.4+20260311"
+const Version = "0.0.3-beta.5+20260311"
 
 const banner = `
     __  _________    _____ __ __ _____   __    _       ______  ___    ____ 
@@ -41,6 +41,7 @@ type Config struct {
 	Port             int      `json:"port"`
 	RootPath         string   `json:"root_path"`
 	CORSAllowOrigins []string `json:"cors_allow_origins"`
+	FaviconPath      string   `json:"favicon_path"`
 	ProxyEnabled     bool     `json:"proxy_enabled"`
 	ProxyProtocol    string   `json:"proxy_protocol"`
 	ProxyHost        string   `json:"proxy_host"`
@@ -225,7 +226,13 @@ func main() {
 	fmt.Printf("                                                    v%s\n\n", Version)
 
 	configPath := pflag.StringP("config", "c", "config.json", "path to config file")
+	versionFlag := pflag.BoolP("version", "v", false, "print version and exit")
 	pflag.Parse()
+
+	if *versionFlag {
+		fmt.Printf("mc-skin-wrap-go v%s\n", Version)
+		os.Exit(0)
+	}
 
 	loadConfig(*configPath)
 	initHTTPClient()
@@ -254,6 +261,22 @@ func main() {
 		base.GET("/mcjava/avatar/:name", getAvatar)
 		base.GET("/mcjava/skin/:name", getSkin)
 		base.GET("/mcjava/server_status/:addr", getServerStatus)
+	}
+
+	// Favicon
+	if config.FaviconPath != "" {
+		faviconAbs := config.FaviconPath
+		if !filepath.IsAbs(faviconAbs) {
+			faviconAbs, _ = filepath.Abs(faviconAbs)
+		}
+		if _, err := os.Stat(faviconAbs); err == nil {
+			base.GET("/favicon.ico", func(c *gin.Context) {
+				c.File(faviconAbs)
+			})
+			fmt.Printf("[INFO] Favicon: %s\n", faviconAbs)
+		} else {
+			fmt.Printf("[WARN] Favicon 文件未找到: %s\n", faviconAbs)
+		}
 	}
 
 	// Swagger 文档路由 (挂载在 rootPath 下)

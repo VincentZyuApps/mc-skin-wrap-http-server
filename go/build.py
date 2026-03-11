@@ -130,6 +130,12 @@ def build(goos, goarch, binary_name, version):
         shutil.copy(example_config, os.path.join(build_path, "config.json"))
         log_copy("Added config.example.json + config.json")
 
+    # 3.5 复制 favicon
+    favicon_src = os.path.join(PROJECT_ROOT, "assets", "favicon.ico")
+    if os.path.exists(favicon_src):
+        shutil.copy(favicon_src, os.path.join(build_path, "favicon.ico"))
+        log_copy("Added favicon.ico")
+
     # 4. 压缩
     archive_base = os.path.join(DIST_DIR, dir_name)
     if goos == "windows":

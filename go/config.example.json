@@ -13,6 +13,9 @@
         "*"
     ],
 
+    "_favicon_path": "favicon 图标文件路径（相对于运行目录）。留空字符串表示不提供 favicon",
+    "favicon_path": "favicon.ico",
+
     "_proxy_enabled": "是否启用代理，默认 false。设为 true 可模拟国外网络环境（比如部署到海外 VPS 前先在本地测试）",
     "proxy_enabled": false,
 
