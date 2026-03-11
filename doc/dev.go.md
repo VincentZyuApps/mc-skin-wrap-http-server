@@ -35,7 +35,7 @@ python .\go\build.py
 python .\go\build.py --os windows --arch amd64
 
 # 解压 (在项目根目录下运行)
-7z x .\dist\mc-skin-wrap_0.0.2-beta.5+20260311_windows_amd64.zip -odist\
+7z x .\dist\mc-skin-wrap_0.0.3-beta.4+20260311_windows_amd64.zip -odist\
 ```
 
 ### WSL / Linux Bash
@@ -55,8 +55,8 @@ python3 go/build.py
 python3 go/build.py --os linux --arch amd64
 
 # 解压 (在项目根目录下运行)
-7z x dist/mc-skin-wrap_0.0.2-beta.5+20260311_linux_amd64.tar.gz -odist/
-7z x dist/mc-skin-wrap_0.0.2-beta.5+20260311_linux_amd64.tar -odist/ && rm dist/*.tar
+7z x dist/mc-skin-wrap_0.0.3-beta.4+20260311_linux_amd64.tar.gz -odist/
+7z x dist/mc-skin-wrap_0.0.3-beta.4+20260311_linux_amd64.tar -odist/ && rm dist/*.tar
 ```
 
 

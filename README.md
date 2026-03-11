@@ -137,6 +137,7 @@ uv run python main.py
   "host": "0.0.0.0",
   "port": 60311,
   "root_path": "/gin_skin_wrap",
+  "cors_allow_origins": ["*"],
   "proxy_enabled": false,
   "proxy_protocol": "http",
   "proxy_host": "127.0.0.1",
@@ -144,6 +145,8 @@ uv run python main.py
   "log_level": "info"
 }
 ```
+
+> 反向代理部署时，Nginx 需要额外透传 `X-Forwarded-Host`、`X-Forwarded-Proto`、`X-Forwarded-Prefix`，这样 Go 版 Swagger UI 的 `Try it out` 才会自动拼出正确的外部 URL。
 
 ## 📁 项目结构
 

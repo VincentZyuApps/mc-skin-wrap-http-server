@@ -17,10 +17,10 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	_ "mc-skin-wrap-go/docs" // 导入自动生成的文档
+	docs "mc-skin-wrap-go/docs"
 )
 
-const Version = "0.0.2-beta.7+20260311"
+const Version = "0.0.3-beta.4+20260311"
 
 const banner = `
     __  _________    _____ __ __ _____   __    _       ______  ___    ____ 
@@ -37,14 +37,15 @@ const banner = `
 `
 
 type Config struct {
-	Host          string `json:"host"`
-	Port          int    `json:"port"`
-	RootPath      string `json:"root_path"`
-	ProxyEnabled  bool   `json:"proxy_enabled"`
-	ProxyProtocol string `json:"proxy_protocol"`
-	ProxyHost     string `json:"proxy_host"`
-	ProxyPort     int    `json:"proxy_port"`
-	LogLevel      string `json:"log_level"`
+	Host             string   `json:"host"`
+	Port             int      `json:"port"`
+	RootPath         string   `json:"root_path"`
+	CORSAllowOrigins []string `json:"cors_allow_origins"`
+	ProxyEnabled     bool     `json:"proxy_enabled"`
+	ProxyProtocol    string   `json:"proxy_protocol"`
+	ProxyHost        string   `json:"proxy_host"`
+	ProxyPort        int      `json:"proxy_port"`
+	LogLevel         string   `json:"log_level"`
 }
 
 var config Config
@@ -93,6 +94,125 @@ func initHTTPClient() {
 	}
 }
 
+func normalizePathPrefix(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" || value == "/" {
+		return ""
+	}
+	if !strings.HasPrefix(value, "/") {
+		value = "/" + value
+	}
+	return strings.TrimRight(value, "/")
+}
+
+func joinPathPrefixes(parts ...string) string {
+	var builder strings.Builder
+	for _, part := range parts {
+		if part == "" {
+			continue
+		}
+		// Ensure leading slash for the component if it's not empty/root
+		if builder.Len() > 0 && !strings.HasSuffix(builder.String(), "/") && !strings.HasPrefix(part, "/") {
+			builder.WriteString("/")
+		}
+		builder.WriteString(part)
+	}
+
+	result := builder.String()
+	// Ensure the result starts with / if it's not empty
+	if result != "" && !strings.HasPrefix(result, "/") {
+		result = "/" + result
+	}
+	// Clean up double slashes, but be careful with *any which is valid
+	// We can use a simple replace for common double slashes arising from joins
+	result = strings.ReplaceAll(result, "//", "/")
+
+	if result == "" {
+		return "/"
+	}
+	return result
+}
+
+func firstForwardedValue(value string) string {
+	if value == "" {
+		return ""
+	}
+	return strings.TrimSpace(strings.Split(value, ",")[0])
+}
+
+func requestHost(c *gin.Context) string {
+	if host := firstForwardedValue(c.GetHeader("X-Forwarded-Host")); host != "" {
+		return host
+	}
+	if c.Request.Host != "" {
+		return c.Request.Host
+	}
+	return fmt.Sprintf("127.0.0.1:%d", config.Port)
+}
+
+func requestScheme(c *gin.Context) string {
+	if scheme := firstForwardedValue(c.GetHeader("X-Forwarded-Proto")); scheme != "" {
+		return scheme
+	}
+	if c.Request.TLS != nil {
+		return "https"
+	}
+	return "http"
+}
+
+func requestProxyPrefix(c *gin.Context) string {
+	return normalizePathPrefix(firstForwardedValue(c.GetHeader("X-Forwarded-Prefix")))
+}
+
+func buildSwaggerDoc(c *gin.Context, rootPath string) string {
+	spec := *docs.SwaggerInfo
+	spec.Host = requestHost(c)
+	spec.BasePath = joinPathPrefixes(requestProxyPrefix(c), rootPath)
+	spec.Schemes = []string{requestScheme(c)}
+	return spec.ReadDoc()
+}
+
+func applyCORS(r *gin.Engine) {
+	allowedOrigins := make([]string, 0, len(config.CORSAllowOrigins))
+	for _, origin := range config.CORSAllowOrigins {
+		origin = strings.TrimSpace(origin)
+		if origin != "" {
+			allowedOrigins = append(allowedOrigins, origin)
+		}
+	}
+	if len(allowedOrigins) == 0 {
+		allowedOrigins = []string{"*"}
+	}
+
+	r.Use(func(c *gin.Context) {
+		origin := c.GetHeader("Origin")
+		allowAll := len(allowedOrigins) == 1 && allowedOrigins[0] == "*"
+
+		if allowAll {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		} else if origin != "" {
+			for _, allowedOrigin := range allowedOrigins {
+				if strings.EqualFold(allowedOrigin, origin) {
+					c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+					c.Writer.Header().Add("Vary", "Origin")
+					break
+				}
+			}
+		}
+
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept, Origin")
+		c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Type, Content-Length")
+
+		if c.Request.Method == http.MethodOptions {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		c.Next()
+	})
+}
+
 // @title			MC Skin Wrap API
 // @version		0.0.1
 // @description	Minecraft 皮肤/头像/服务器状态反向代理服务
@@ -120,13 +240,13 @@ func main() {
 	}
 
 	r := gin.Default()
+	applyCORS(r)
+	if err := r.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {
+		log.Fatalf("[ERROR] 设置可信代理失败: %v", err)
+	}
 
 	// 确保 RootPath 以 / 开头且不以 / 结尾
-	rootPath := config.RootPath
-	if rootPath != "" && !strings.HasPrefix(rootPath, "/") {
-		rootPath = "/" + rootPath
-	}
-	rootPath = strings.TrimSuffix(rootPath, "/")
+	rootPath := normalizePathPrefix(config.RootPath)
 
 	// 路由组处理 RootPath
 	base := r.Group(rootPath)
@@ -138,15 +258,53 @@ func main() {
 
 	// Swagger 文档路由 (挂载在 rootPath 下)
 	// 访问地址: http://host:port/gin_skin_wrap/docs/
-	// 注意: gin-swagger 内部用 RequestURI 正则匹配文件名，
-	//       访问 /docs/ 时 URI 不含文件名会 404，需手动重定向到 index.html
-	swagHandler := ginSwagger.WrapHandler(swaggerFiles.Handler)
-	base.GET("/docs/*any", func(c *gin.Context) {
-		if c.Param("any") == "/" {
-			c.Redirect(http.StatusMovedPermanently, rootPath+"/docs/index.html")
+	// 反向代理场景会根据 X-Forwarded-* 头动态修正 host/basePath。
+
+	// 为了避免路由冲突 (*any vs doc.json)，将 doc.json 放在 docs 目录外层
+	// 例如: /gin_skin_wrap/swagger_doc.json
+
+	// Ensure paths are constructed correctly using path.Join for cleanliness
+	// but manually handle the rootPath logic to be safe
+	docJsonPath := rootPath + "/swagger_doc.json"
+	docJsonPath = strings.ReplaceAll(docJsonPath, "//", "/")
+
+	r.GET(docJsonPath, func(c *gin.Context) {
+		doc := buildSwaggerDoc(c, rootPath)
+		c.Data(http.StatusOK, "application/json", []byte(doc))
+	})
+
+	// Serve swagger UI, pointing it to our dynamic doc.json endpoint
+	// 使用相对路径，使其同时在直接访问和反代访问下工作
+	// 浏览器地址: .../docs/index.html -> 相对路径 ../swagger_doc.json -> .../swagger_doc.json
+
+	docsPath := rootPath + "/docs/*any"
+	docsPath = strings.ReplaceAll(docsPath, "//", "/")
+
+	rawSwaggerHandler := ginSwagger.WrapHandler(swaggerFiles.Handler,
+		ginSwagger.URL("../swagger_doc.json"),
+	)
+
+	r.GET(docsPath, func(c *gin.Context) {
+		// Fix 404 on trailing slash access (e.g. /docs/)
+		// swaggo handler might not default to index.html for root path in all versions/setups
+		if c.Param("any") == "/" || c.Param("any") == "" {
+			c.Redirect(http.StatusMovedPermanently, "index.html")
 			return
 		}
-		swagHandler(c)
+		rawSwaggerHandler(c)
+	})
+
+	// Redirect root /docs (without slash) to /docs/index.html
+	docsRoot := rootPath + "/docs"
+	docsRoot = strings.ReplaceAll(docsRoot, "//", "/")
+	// Only register if it doesn't conflict.
+	// In gin, /path and /path/*any can coexist if handled carefully,
+	// but usually *any at /path/*any matches /path/something, not /path itself.
+	r.GET(docsRoot, func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, docsRoot+"/index.html")
+	})
+	r.GET(joinPathPrefixes(rootPath, "/health"), func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 	})
 
 	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)

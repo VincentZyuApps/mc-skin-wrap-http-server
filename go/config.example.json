@@ -8,6 +8,11 @@
     "_root_path": "根路径前缀，用于反向代理场景（如 nginx 配置了 /gin_skin_wrap 路径转发），留空字符串表示无前缀",
     "root_path": "/gin_skin_wrap",
 
+    "_cors_allow_origins": "允许跨域的来源列表。默认 [\"*\"]。生产环境建议改为明确的域名列表",
+    "cors_allow_origins": [
+        "*"
+    ],
+
     "_proxy_enabled": "是否启用代理，默认 false。设为 true 可模拟国外网络环境（比如部署到海外 VPS 前先在本地测试）",
     "proxy_enabled": false,
 
