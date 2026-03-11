@@ -21,6 +21,10 @@
 - 🧥 **玩家皮肤** — 通过 [minotar.net](https://minotar.net)
 - 📊 **Java 服务器状态** — 通过 [mcstatus.io](https://mcstatus.io)
 
+| 🎭 玩家头像 | 🧥 玩家皮肤 | 📊 服务器状态 |
+|:---:|:---:|:---:|
+| ![avatar](doc/avatar.png) | ![skin](doc/skin.png) | ![server_status](doc/server-browser-json.png) |
+
 ## 💡 使用场景举例
 
 把这个服务部署到阿美莉卡 or 其他海外地区的 VPS 上，然后让你的**前端网页**或**机器人插件**来调用——一个方便的代理，绕过墙或简化 API 访问。
