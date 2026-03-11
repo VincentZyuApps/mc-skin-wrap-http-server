@@ -159,18 +159,35 @@ uv run python main.py
 
 ```
 mc-skin-wrap-http-server/
-├── go/                 # 🦀 Go 版本 (生产环境推荐)
+├── assets/             # 🎨 项目资源 (favicon 等)
+│   ├── favicon.ico
+│   ├── gen_favicon.sh
+│   └── VincentZyu.Minecraft.png
+├── go/                 # 💙 Go 版本 (生产环境推荐)
 │   ├── main.go
 │   ├── build.py        # 交叉编译脚本
 │   ├── local_dev.py    # 本地开发辅助
-│   └── config.example.json
+│   ├── config.example.json
+│   ├── go.mod
+│   ├── go.sum
+│   └── docs/           # Swagger 生成文件
+│       ├── docs.go
+│       ├── swagger.json
+│       └── swagger.yaml
 ├── py/                 # 🐍 Python 版本 (原型演示)
 │   ├── main.py
-│   └── config.example.json
+│   ├── local_dev.py    # 本地开发辅助
+│   ├── config.example.json
+│   ├── requirements.txt
+│   └── favicon.ico
 ├── doc/                # 📖 开发文档
 │   ├── dev.go.md
 │   ├── dev.py.md
-│   └── dev.git.md
+│   ├── dev.git.md
+│   ├── prod.go.md
+│   └── scripts/        # 一键安装脚本
+│       ├── install.sh
+│       └── install_gitee.sh
 └── dist/               # 📦 构建产物
 ```
 

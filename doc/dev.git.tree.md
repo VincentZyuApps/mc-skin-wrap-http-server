@@ -27,7 +27,20 @@ git diff HEAD --stat
 # 添加所有文件并提交
 git add -A
 git commit -m "feat: your commit message"
-
-# 推送到远程
-git push origin main
 ```
+
+## 🌲 项目目录树
+
+### 生成命令
+
+```bash
+# WSL / Linux / macOS
+# 安装 tree (如果没有)
+# Ubuntu/Debian: sudo apt install tree
+# macOS: brew install tree
+
+# 忽略 dist、.venv、__pycache__ 目录
+tree -I "dist|.venv|__pycache__"
+```
+
+> 💡 **提示**: `tmp/` 目录包含敏感数据，已在 `.gitignore` 中忽略。`dist/` 为构建产物目录，同样不入库。
