@@ -82,14 +82,12 @@ info "检测到系统: ${CYAN}${OS} ${ARCH}${NC} → 将下载 ${CYAN}linux_${AR
 # 检查是否通过管道执行
 # ============================================================
 
-# 如果是 curl | bash 方式，无法读取 stdin 输入，需要重定向
-if [ ! -t 0 ]; then
-    # 尝试从未被重定向的终端读取
-    if [ -t 1 ]; then
-        exec < /dev/tty
-    elif [ -t 2 ]; then
-        exec < /dev/tty
-    fi
+# 如果是 curl | bash 方式，stdin (fd 0) 是脚本内容，不能动它！
+# 我们在 fd 3 上打开终端，所有 read 从 fd 3 读取用户输入。
+if [ ! -t 0 ] && [ -e /dev/tty ]; then
+    exec 3</dev/tty
+else
+    exec 3<&0
 fi
 
 # ============================================================
@@ -194,13 +192,13 @@ echo ""
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 info "当前目录: ${CYAN}${DEFAULT_DIR}${NC}"
 echo -n -e "${BLUE}[?]${NC} 是否下载到当前目录? [Y/n]: "
-read -r CONFIRM_DIR
+read -r CONFIRM_DIR <&3
 
 CONFIRM_DIR=${CONFIRM_DIR:-Y}
 
 if [[ "$CONFIRM_DIR" =~ ^[Nn]$ ]]; then
     echo -n -e "${BLUE}[?]${NC} 请输入自定义绝对路径: "
-    read -r CUSTOM_DIR
+    read -r CUSTOM_DIR <&3
     
     if [ -z "$CUSTOM_DIR" ]; then
         error "路径不能为空"
@@ -244,7 +242,7 @@ success "下载完成: ${CYAN}${ARCHIVE_PATH}${NC}"
 echo ""
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -n -e "${BLUE}[?]${NC} 是否解压文件? [Y/n]: "
-read -r CONFIRM_EXTRACT
+read -r CONFIRM_EXTRACT <&3
 
 CONFIRM_EXTRACT=${CONFIRM_EXTRACT:-Y}
 
@@ -263,7 +261,7 @@ if [[ "$CONFIRM_EXTRACT" =~ ^[Yy]$ ]] || [ -z "$CONFIRM_EXTRACT" ]; then
     echo ""
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -n -e "${BLUE}[?]${NC} 是否删除压缩包? [Y/n]: "
-    read -r CONFIRM_REMOVE
+    read -r CONFIRM_REMOVE <&3
     
     CONFIRM_REMOVE=${CONFIRM_REMOVE:-Y}
     
@@ -281,7 +279,7 @@ if [[ "$CONFIRM_EXTRACT" =~ ^[Yy]$ ]] || [ -z "$CONFIRM_EXTRACT" ]; then
         # 询问是否 cd 到目录
         echo ""
         echo -n -e "${BLUE}[?]${NC} 是否进入解压目录? [Y/n]: "
-        read -r CONFIRM_CD
+        read -r CONFIRM_CD <&3
         
         CONFIRM_CD=${CONFIRM_CD:-Y}
         
