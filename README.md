@@ -72,7 +72,7 @@
 >
 > ✨ 开源代码不够，还免费提供公开接口 —— 如此慷慨的作者，不来个 ⭐ Star 说不过去吧？
 >
-> 🖥️ 2RMB/月的 [狐蒂云](https://www.foxcloud.net/) 小鸡，到期时间：**2026-08-19 18:29**
+> 🖥️ 2RMB/月的 [狐蒂云](https://www.szhdy.com/) 小鸡，到期时间：**2026-08-19 18:29**
 >
 > 📢 怕作者忘记续费？欢迎在 [Issue](https://github.com/VincentZyuApps/mc-skin-wrap-http-server/issues) 或 QQ 群里提醒我续费~ （防止自己忘记捏 😋）
 
