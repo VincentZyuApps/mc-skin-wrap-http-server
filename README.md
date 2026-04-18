@@ -80,10 +80,10 @@
 
 | 接口 | 在线地址 |
 |------|---------|
-| 🎭 玩家头像 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu) |
-| 🧥 玩家皮肤 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu) |
-| 📊 服务器状态 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn) |
-| 📚 Swagger 文档 | [https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html](https://us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html) |
+| 🎭 玩家头像 | *hidden* |
+| 🧥 玩家皮肤 | *hidden* |
+| 📊 服务器状态 | *hidden* |
+| 📚 Swagger 文档 | *hidden* |
 
 **② 腾讯 EdgeOne CDN 加速 — 全球节点 + 边缘缓存**
 
