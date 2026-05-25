@@ -111,8 +111,8 @@ fi
 
 ALL_RELEASES=$($FETCH_CMD "$RELEASES_API" 2>/dev/null) || error "无法获取 Release 列表，请检查网络连接"
 
-# 提取所有版本号
-ALL_VERSIONS=$(echo "$ALL_RELEASES" | grep -oP '"tag_name":\s*"\K[^"]+')
+# 提取所有版本号（Gitee API 返回升序，最旧在前，需要反转）
+ALL_VERSIONS=$(echo "$ALL_RELEASES" | grep -oP '"tag_name":\s*"\K[^"]+' | tac)
 VERSION_COUNT=$(echo "$ALL_VERSIONS" | grep -c . || echo "0")
 
 if [ -z "$ALL_VERSIONS" ] || [ "$VERSION_COUNT" -eq 0 ]; then
