@@ -174,23 +174,12 @@ fi
 PLAIN_VER="${VERSION#v}"
 FILENAME="mc-skin-wrap_${PLAIN_VER}_linux_${ARCH_NAME}.tar.gz"
 
-# Gitee 下载链接需要对 + 号进行 URL 编码 (%2B)
-ENCODED_VER=$(echo "$VERSION" | sed 's/+/%2B/g')
-
-# 通过 API 获取 Release 附件信息（Gitee 上传附件时会把 + 替换为空格，直接用 API 拿准确链接）
-RELEASE_API="https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases/tags/${ENCODED_VER}"
-RELEASE_JSON=$($FETCH_CMD "$RELEASE_API" 2>/dev/null) || error "无法获取版本 ${VERSION} 的信息"
-
-# 匹配下载链接（优先匹配精确文件名，再匹配空格版）
-DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -oP '"browser_download_url":\s*"\K[^"]+' | grep -F "$FILENAME" | head -1)
-if [ -z "$DOWNLOAD_URL" ]; then
-    SPACE_FILENAME=$(echo "$FILENAME" | sed 's/+/ /g')
-    DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -oP '"browser_download_url":\s*"\K[^"]+' | grep -F "$SPACE_FILENAME" | head -1)
-fi
-
-if [ -z "$DOWNLOAD_URL" ]; then
-    error "找不到适合当前系统的下载文件: $FILENAME"
-fi
+# 仿照 winload 直接构造下载链接。
+# Gitee 在 Release 附件下载路径中会把文件名里的 + 处理为空格，再编码成 %20。
+BASE_URL="https://gitee.com/${OWNER}/${REPO}/releases/download/${VERSION}"
+GITEE_FILENAME=$(echo "$FILENAME" | sed 's/+/ /g')
+ENCODED_FILENAME=$(echo "$GITEE_FILENAME" | sed 's/ /%20/g')
+DOWNLOAD_URL="${BASE_URL}/${ENCODED_FILENAME}"
 
 info "下载文件: ${CYAN}$FILENAME${NC}"
 
