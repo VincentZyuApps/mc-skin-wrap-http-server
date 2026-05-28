@@ -76,34 +76,34 @@
 >
 > 📢 怕作者忘记续费？欢迎在 [Issue](https://github.com/VincentZyuApps/mc-skin-wrap-http-server/issues) 或 QQ 群里提醒我续费~ （防止自己忘记捏 😋）
 
-~~**① 狐蒂云 已失效 — 服务商跑路了**
+~~**① 狐蒂云 (已失效 — 服务商跑路了)**~~
 
 | 接口 | 在线地址 |
 |------|---------|
-| 🎭 玩家头像 | *hidden* |
-| 🧥 玩家皮肤 | *hidden* |
-| 📊 服务器状态 | *hidden* |
-| 📚 Swagger 文档 | *hidden* |~~
+| ~~🎭 玩家头像~~ | ~~*hidden*~~ |
+| ~~🧥 玩家皮肤~~ | ~~*hidden*~~ |
+| ~~📊 服务器状态~~ | ~~*hidden*~~ |
+| ~~📚 Swagger 文档~~ | ~~*hidden*~~ |~~
 
-~~**② 腾讯 EdgeOne CDN 加速 — 全球节点 + 边缘缓存**
+~~**② 腾讯 EdgeOne CDN 加速 — 全球节点 + 边缘缓存 (已失效 — 服务商跑路了)**~~
 
 | 接口 | 在线地址 |
 |------|---------|
-| 🎭 玩家头像 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu) |
-| 🧥 玩家皮肤 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu) |
-| 📊 服务器状态 | [https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn) |
+| ~~🎭 玩家头像~~ | ~~[https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu)~~ |
+| ~~🧥 玩家皮肤~~ | ~~[https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu)~~ |
+| ~~📊 服务器状态~~ | ~~[https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn)~~ |
 | ~~📚 Swagger 文档~~ | ~~[https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html](https://eo-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html)~~ |
 
 > ⚠️ EdgeOne 线路的 Swagger 文档好像有点问题，懒得修了，反正其他两个线路的文档能用 😂~~
 
-~~**③ Cloudflare CDN — 隐藏源站 IP + DDoS 防护 + 缓存**
+~~**③ Cloudflare CDN — 隐藏源站 IP + DDoS 防护 + 缓存 (已失效 — 服务商跑路了)**~~
 
 | 接口 | 在线地址 |
 |------|---------|
-| 🎭 玩家头像 | [https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu) |
-| 🧥 玩家皮肤 | [https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu) |
-| 📊 服务器状态 | [https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn) |
-| 📚 Swagger 文档 | [https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html) |
+| ~~🎭 玩家头像~~ | ~~[https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/avatar/VincentZyu)~~ |
+| ~~🧥 玩家皮肤~~ | ~~[https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/skin/VincentZyu)~~ |
+| ~~📊 服务器状态~~ | ~~[https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/mcjava/server_status/bc.vincentzyu233.cn)~~ |
+| ~~📚 Swagger 文档~~ | ~~[https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html](https://cf-us-hudiyun.vincentzyu233.cn/nginx_gin_skin/gin_skin_wrap/docs/index.html)~~ |
 ~~
 
 **④ 阿里云 — Nginx + Let's Encrypt（无 CDN）**
